@@ -17,7 +17,7 @@ export class SubcategoriesService {
   async create(createSubcategoryDto: CreateSubcategoryDto): Promise<Subcategory> {
     // Verificar si la categoría existe
     const category = await this.categoryRepository.findOne({
-      where: { id: createSubcategoryDto.categoryId },
+      where: { id: createSubcategoryDto.category_id },
     });
 
     if (!category) {

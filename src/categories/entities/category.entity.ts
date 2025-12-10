@@ -17,6 +17,9 @@ export class Category {
   @Column({ unique: true, length: 255 })
   name: string;
 
+  @Column({ length: 255, nullable: true })
+  description?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

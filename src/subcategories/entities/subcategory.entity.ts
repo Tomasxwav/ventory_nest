@@ -19,8 +19,11 @@ export class Subcategory {
   @Column({ unique: true, length: 255 })
   name: string;
 
+  @Column({ length: 255, nullable: true })
+  description?: string;
+
   @Column({ name: 'category_id' })
-  categoryId: number;
+  category_id: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
