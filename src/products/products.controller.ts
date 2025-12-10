@@ -15,6 +15,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
@@ -58,24 +60,36 @@ export class ProductsController {
       },
     }),
   )
-  create(
-    @Body() createProductDto: CreateProductDto,
+  async create(
+    @Body() body: CreateProductDto,
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<Product> {
+    console.log('Body recibido:', body);
+    const createProductDto = plainToInstance(CreateProductDto, body);
+    console.log('DTO transformado:', createProductDto);
+    
+    // Validar manualmente
+    const errors = await validate(createProductDto);
+    if (errors.length > 0) {
+      const messages = errors.map(error => Object.values(error.constraints || {})).flat();
+      throw new BadRequestException(messages);
+    }
+    
+    // Log temporal para debuggear
+    console.log('DTO transformado:', createProductDto);
+    console.log('Archivo recibido:', file?.filename);
+    
     return this.productsService.create(createProductDto, file);
   }
 
   @Get()
   findAll(
-    @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 10,
-  ): Promise<{
-    data: Product[];
-    total: number;
-    page: number;
-    lastPage: number;
-  }> {
-    return this.productsService.findAll(page, limit);
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ): Promise<any[]> {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.productsService.findAll(pageNum, limitNum);
   }
 
   @Get(':id/image')

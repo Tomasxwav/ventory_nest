@@ -11,6 +11,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { Brand } from '../brands/entities/brand.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
+import { Inventory } from '../inventory/entities/inventory.entity';
+import { Item } from '../items/entities/item.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -25,6 +27,10 @@ export class ProductsService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Subcategory)
     private readonly subcategoryRepository: Repository<Subcategory>,
+    @InjectRepository(Inventory)
+    private readonly inventoryRepository: Repository<Inventory>,
+    @InjectRepository(Item)
+    private readonly itemRepository: Repository<Item>,
   ) {}
 
   async create(
@@ -42,7 +48,7 @@ export class ProductsService {
 
     // Verificar si la marca existe
     const brand = await this.brandRepository.findOne({
-      where: { id: createProductDto.brandId },
+      where: { id: createProductDto.brand_id },
     });
 
     if (!brand) {
@@ -51,7 +57,7 @@ export class ProductsService {
 
     // Verificar si la categoría existe
     const category = await this.categoryRepository.findOne({
-      where: { id: createProductDto.categoryId },
+      where: { id: createProductDto.category_id },
     });
 
     if (!category) {
@@ -60,7 +66,7 @@ export class ProductsService {
 
     // Verificar si la subcategoría existe
     const subcategory = await this.subcategoryRepository.findOne({
-      where: { id: createProductDto.subcategoryId },
+      where: { id: createProductDto.subcategory_id },
     });
 
     if (!subcategory) {
@@ -74,32 +80,99 @@ export class ProductsService {
     }
 
     const product = this.productRepository.create({
-      ...createProductDto,
+      name: createProductDto.name,
+      description: createProductDto.description,
+      unit_of_measure: createProductDto.unit_of_measure,
+      status: createProductDto.status,
+      currency: createProductDto.currency,
+      serial_number: createProductDto.serial_number,
+      allow_low_stock_limit: createProductDto.allow_low_stock_limit,
+      low_stock_threshold: createProductDto.low_stock_threshold,
+      suggested_sale_cost: createProductDto.suggested_sale_cost,
+      price: createProductDto.price,
+      stock: createProductDto.stock,
+      sku: createProductDto.sku,
+      brand_id: createProductDto.brand_id,
+      category_id: createProductDto.category_id,
+      subcategory_id: createProductDto.subcategory_id,
       image: imagePath,
     });
 
-    return await this.productRepository.save(product);
+    const savedProduct = await this.productRepository.save(product);
+
+    // Crear inventario e item si se proporcionaron los parámetros opcionales
+    await this.createInventoryIfNeeded(savedProduct, createProductDto);
+
+    return savedProduct;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<{
-    data: Product[];
-    total: number;
-    page: number;
-    lastPage: number;
-  }> {
-    const [data, total] = await this.productRepository.findAndCount({
-      relations: ['brand', 'category', 'subcategory'],
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { createdAt: 'DESC' },
+  private shouldCreateInventory(createProductDto: CreateProductDto): boolean {
+    return !!(
+      createProductDto.sale_cost ||
+      createProductDto.purchase_cost ||
+      createProductDto.sale_currency !== undefined ||
+      createProductDto.purchase_currency !== undefined
+    );
+  }
+
+  private async createInventoryIfNeeded(
+    product: Product,
+    createProductDto: CreateProductDto,
+  ): Promise<void> {
+    if (!this.shouldCreateInventory(createProductDto)) {
+      return;
+    }
+
+    // Crear el inventario
+    const inventory = this.inventoryRepository.create({
+      productId: product.id,
     });
 
-    return {
-      data,
-      total,
-      page,
-      lastPage: Math.ceil(total / limit),
-    };
+    const savedInventory = await this.inventoryRepository.save(inventory);
+
+    // Crear el item
+    const item = this.itemRepository.create({
+      inventoryId: savedInventory.id,
+      saleCost: createProductDto.sale_cost,
+      purchaseCost: createProductDto.purchase_cost,
+      saleCurrency: createProductDto.sale_currency,
+      purchaseCurrency: createProductDto.purchase_currency,
+    });
+
+    await this.itemRepository.save(item);
+  }
+
+  async findAll(page: number = 1, limit: number = 10): Promise<any[]> {
+    const products = await this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoin('product.inventories', 'inventory')
+      .leftJoin('inventory.items', 'item')
+      .select([
+        'product.id as id',
+        'product.name as name',
+        'product.status as status',
+        'product.sku as sku',
+        'brand.name as brand_name',
+        'CASE WHEN product.image IS NOT NULL AND product.image != \'\' THEN true ELSE false END as image',
+        'COALESCE(COUNT(DISTINCT item.id), 0) as product_count',
+      ])
+      .groupBy('product.id')
+      .addGroupBy('brand.name')
+      .orderBy('product.created_at', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getRawMany();
+
+    return products.map(product => ({
+      id: product.id,
+      name: product.name,
+      status: product.status,
+      sku: product.sku,
+      brand_name: product.brand_name,
+      image: product.image === 'true' || product.image === true || product.image === 1,
+      product_count: parseInt(product.product_count) || 0,
+    }));
   }
 
   async getImage(id: number): Promise<string> {

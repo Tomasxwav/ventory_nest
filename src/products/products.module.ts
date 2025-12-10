@@ -7,10 +7,12 @@ import { Product } from './entities/product.entity';
 import { Brand } from '../brands/entities/brand.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
+import { Inventory } from '../inventory/entities/inventory.entity';
+import { Item } from '../items/entities/item.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Brand, Category, Subcategory]),
+    TypeOrmModule.forFeature([Product, Brand, Category, Subcategory, Inventory, Item]),
     MulterModule.register({
       dest: './uploads/products',
     }),

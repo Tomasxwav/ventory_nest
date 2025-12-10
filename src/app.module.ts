@@ -6,10 +6,14 @@ import { BrandsModule } from './brands/brands.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './subcategories/subcategories.module';
 import { ProductsModule } from './products/products.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { ItemsModule } from './items/items.module';
 import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
 import { Product } from './products/entities/product.entity';
+import { Inventory } from './inventory/entities/inventory.entity';
+import { Item } from './items/entities/item.entity';
 
 @Module({
   imports: [
@@ -20,13 +24,15 @@ import { Product } from './products/entities/product.entity';
       username: 'tmartinez',
       password: 'postgres',
       database: 'ventory_nest',
-      entities: [Brand, Category, Subcategory, Product],
+      entities: [Brand, Category, Subcategory, Product, Inventory, Item],
       synchronize: true,
     }),
     BrandsModule,
     CategoriesModule,
     SubcategoriesModule,
     ProductsModule,
+    InventoryModule,
+    ItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
