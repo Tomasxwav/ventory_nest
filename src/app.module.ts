@@ -19,6 +19,8 @@ import { Inventory } from './inventory/entities/inventory.entity';
 import { Item } from './items/entities/item.entity';
 import { User } from './users/entities/user.entity';
 import { Session } from './sessions/entities/session.entity';
+import { Suppliers } from './suppliers/entities/suppliers.entity';
+import { SuppliersModule } from './suppliers/suppliers.module';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { Session } from './sessions/entities/session.entity';
       username: 'tmartinez',
       password: 'postgres',
       database: 'ventory_nest',
-      entities: [Brand, Category, Subcategory, Product, Inventory, Item, User, Session],
+      entities: [Brand, Category, Subcategory, Product, Inventory, Item, User, Session, Suppliers],
       synchronize: true,
     }),
     BrandsModule,
@@ -41,6 +43,7 @@ import { Session } from './sessions/entities/session.entity';
     UsersModule,
     AuthModule,
     SessionsModule,
+    SuppliersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -37,7 +37,9 @@ export class SessionsController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(
     @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<{
+    data: { access_token: string; refresh_token: string };
+  }> {
     return this.authService.refreshToken(
       refreshTokenDto.access_token,
       refreshTokenDto.refresh_token,

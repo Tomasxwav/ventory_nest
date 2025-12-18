@@ -103,7 +103,7 @@ export class AuthService {
   async refreshToken(
     accessToken: string,
     refreshToken: string,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<{ data : { access_token: string; refresh_token: string } }> {
     const session = await this.sessionsService.findByAccessToken(accessToken);
 
     if (!session) {
@@ -151,9 +151,6 @@ export class AuthService {
       expiresAt: newExpiresAt,
     });
 
-    return {
-      access_token: newAccessToken,
-      refresh_token: newRefreshToken,
-    };
+    return {  data: { access_token: newAccessToken, refresh_token: newRefreshToken } };
   }
 }
