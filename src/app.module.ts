@@ -8,12 +8,14 @@ import { SubcategoriesModule } from './subcategories/subcategories.module';
 import { ProductsModule } from './products/products.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ItemsModule } from './items/items.module';
+import { UsersModule } from './users/users.module';
 import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
 import { Product } from './products/entities/product.entity';
 import { Inventory } from './inventory/entities/inventory.entity';
 import { Item } from './items/entities/item.entity';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -24,7 +26,7 @@ import { Item } from './items/entities/item.entity';
       username: 'tmartinez',
       password: 'postgres',
       database: 'ventory_nest',
-      entities: [Brand, Category, Subcategory, Product, Inventory, Item],
+      entities: [Brand, Category, Subcategory, Product, Inventory, Item, User],
       synchronize: true,
     }),
     BrandsModule,
@@ -33,6 +35,7 @@ import { Item } from './items/entities/item.entity';
     ProductsModule,
     InventoryModule,
     ItemsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
