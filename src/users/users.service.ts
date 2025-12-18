@@ -13,7 +13,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // Verificar si el email ya existe
     const existingEmail = await this.userRepository.findOne({
       where: { email: createUserDto.email },
     });
@@ -22,7 +21,6 @@ export class UsersService {
       throw new ConflictException('Ya existe un usuario con ese email');
     }
 
-    // Verificar si el username ya existe
     const existingUsername = await this.userRepository.findOne({
       where: { username: createUserDto.username },
     });
@@ -31,15 +29,12 @@ export class UsersService {
       throw new ConflictException('Ya existe un usuario con ese nombre de usuario');
     }
 
-    // Verificar que las contraseñas coincidan
     if (createUserDto.password !== createUserDto.password_confirmation) {
       throw new ConflictException('Las contraseñas no coinciden');
     }
 
-    // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Crear el usuario
     const user = this.userRepository.create({
       username: createUserDto.username,
       email: createUserDto.email,

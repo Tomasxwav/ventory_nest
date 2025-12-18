@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MinLength, IsEnum } from 'class-validator';
+import { UserRole } from '../enums/user-role.enum';
 
 export class CreateUserDto {
   @IsNotEmpty({ message: 'El nombre es requerido' })
@@ -20,7 +21,6 @@ export class CreateUserDto {
   password_confirmation: string;
 
   @IsOptional()
-  @IsString({ message: 'El rol debe ser un texto' })
-  @MinLength(2, { message: 'El rol debe tener al menos 2 caracteres' })
-  role?: string;
+  @IsEnum(UserRole, { message: 'El rol debe ser 0 (USER) o 1 (ADMIN)' })
+  role?: UserRole;
 }
