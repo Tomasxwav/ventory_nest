@@ -38,7 +38,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generar tokens
     const payload = { sub: user.id, email: user.email, role: user.role };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -49,15 +48,12 @@ export class AuthService {
       expiresIn: '7d', // Refresh token expira en 7 días
     });
 
-    // Calcular fecha de expiración (7 días desde ahora)
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
-    // Extraer información del navegador del user-agent
     const browser = this.extractBrowser(userAgent);
     const deviceInfo = this.extractDeviceInfo(userAgent);
 
-    // Guardar sesión en la base de datos
     await this.sessionsService.create({
       userId: user.id,
       accessToken,
@@ -102,5 +98,62 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
+  }
+
+  async refreshToken(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    const session = await this.sessionsService.findByAccessToken(accessToken);
+
+    if (!session) {
+      throw new UnauthorizedException('Sesión no encontrada o inválida');
+    }
+
+    if (session.refreshToken !== refreshToken) {
+      throw new UnauthorizedException('Refresh token no coincide');
+    }
+
+    if (session.expiresAt < new Date()) {
+      throw new UnauthorizedException('Sesión expirada');
+    }
+
+    try {
+      this.jwtService.verify(refreshToken);
+    } catch (error) {
+      throw new UnauthorizedException('Refresh token inválido o expirado');
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: session.userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const newAccessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+
+    const newRefreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+
+    const newExpiresAt = new Date();
+    newExpiresAt.setDate(newExpiresAt.getDate() + 7);
+
+    await this.sessionsService.updateTokens(session.id, {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      expiresAt: newExpiresAt,
+    });
+
+    return {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
+    };
   }
 }

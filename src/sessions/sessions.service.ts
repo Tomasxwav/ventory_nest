@@ -72,4 +72,20 @@ export class SessionsService {
 
     return false;
   }
+
+  async updateTokens(
+    sessionId: number,
+    tokenData: {
+      accessToken: string;
+      refreshToken: string;
+      expiresAt: Date;
+    },
+  ): Promise<void> {
+    await this.sessionsRepository.update(sessionId, {
+      accessToken: tokenData.accessToken,
+      refreshToken: tokenData.refreshToken,
+      expiresAt: tokenData.expiresAt,
+      lastActivityAt: new Date(),
+    });
+  }
 }

@@ -14,6 +14,7 @@ import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service';
 import { SessionsService } from '../sessions/sessions.service';
 import { LoginDto } from '../auth/dto/login.dto';
+import { RefreshTokenDto } from '../auth/dto/refresh-token.dto';
 
 @Controller('users')
 export class SessionsController {
@@ -30,6 +31,17 @@ export class SessionsController {
   ): Promise<{ access_token: string; refresh_token: string }> {
     const userAgent = request.headers['user-agent'];
     return this.authService.login(loginDto, ip, userAgent);
+  }
+
+  @Post('refresh_token')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    return this.authService.refreshToken(
+      refreshTokenDto.access_token,
+      refreshTokenDto.refresh_token,
+    );
   }
 
   @Delete('sessions')
