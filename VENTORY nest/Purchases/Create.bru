@@ -1,0 +1,45 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/purchases
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "voucher": "V-2025-001",
+    "invoice": "F-2025-001",
+    "supplierId": 1,
+    "notes": "Compra urgente",
+    "products": [
+      {
+        "productId": 1,
+        "quantity": 2,
+        "items": [
+          {
+            "serialNumber": "SN-001",
+            "purchaseCost": 100.50,
+            "saleCost": 150.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "SN-002",
+            "purchaseCost": 100.50,
+            "saleCost": 150.00
+          }
+        ]
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

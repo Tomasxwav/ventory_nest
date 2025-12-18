@@ -1,0 +1,33 @@
+meta {
+  name: Index
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/products
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~filter[with_image]: false
+  ~filter[inventory_quantity]: 1
+  ~filter[brand_name]: Huawei
+  ~filter[id]: 14
+  ~filter[sku]: AVCSDFSDC
+  ~filter[status]: active
+  ~filter[name]: Tablet
+  ~order_by_field: name
+  ~order_by_direction: desc
+  ~offset: 1
+  ~limit: 1
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NjM1OTM2MDl9.7y2Z58sA7qk5Y-yeJuvn3tEYZk2faWxFUwqnQX3aTHY
+}
+
+settings {
+  encodeUrl: true
+}

@@ -15,10 +15,10 @@ export class Item {
   id: number;
 
   @Column({ name: 'serial_number', length: 255, nullable: true })
-  serialNumber: string;
+  serial_number: string;
 
   @Column({ name: 'inventory_id' })
-  inventoryId: number;
+  inventory_id: number;
 
   @Column({
     name: 'purchase_cost',
@@ -27,7 +27,7 @@ export class Item {
     scale: 4,
     nullable: false,
   })
-  purchaseCost: number;
+  purchase_cost: number;
 
   @Column({
     name: 'sale_cost',
@@ -36,7 +36,7 @@ export class Item {
     scale: 4,
     nullable: false,
   })
-  saleCost: number;
+  sale_cost: number;
 
   @Column({
     name: 'purchase_currency',
@@ -45,7 +45,7 @@ export class Item {
     default: 'mxn',
     nullable: false,
   })
-  purchaseCurrency: string;
+  purchase_currency: string;
 
   @Column({
     name: 'sale_currency',
@@ -54,13 +54,13 @@ export class Item {
     default: 'mxn',
     nullable: false,
   })
-  saleCurrency: string;
+  sale_currency: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updated_at: Date;
 
   @ManyToOne(() => Inventory, (inventory) => inventory.items)
   @JoinColumn({ name: 'inventory_id' })

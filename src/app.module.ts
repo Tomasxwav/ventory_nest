@@ -11,6 +11,8 @@ import { ItemsModule } from './items/items.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionsModule } from './sessions/sessions.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
+import { PurchasesModule } from './purchases/purchases.module';
 import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
@@ -20,7 +22,7 @@ import { Item } from './items/entities/item.entity';
 import { User } from './users/entities/user.entity';
 import { Session } from './sessions/entities/session.entity';
 import { Suppliers } from './suppliers/entities/suppliers.entity';
-import { SuppliersModule } from './suppliers/suppliers.module';
+import { Purchase } from './purchases/entities/purchase.entity';
 
 @Module({
   imports: [
@@ -31,7 +33,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
       username: 'tmartinez',
       password: 'postgres',
       database: 'ventory_nest',
-      entities: [Brand, Category, Subcategory, Product, Inventory, Item, User, Session, Suppliers],
+      entities: [Brand, Category, Subcategory, Product, Inventory, Item, User, Session, Suppliers, Purchase],
       synchronize: true,
     }),
     BrandsModule,
@@ -44,6 +46,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     AuthModule,
     SessionsModule,
     SuppliersModule,
+    PurchasesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

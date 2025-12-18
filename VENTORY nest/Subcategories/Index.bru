@@ -1,0 +1,26 @@
+meta {
+  name: Index
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/subcategories
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~filter[products_count]: 1
+  ~filter[category]: Tec
+  ~filter[name]: Hogar
+  ~order_by_field: name
+  ~order_by_direction: desc
+  ~offset: 1
+  ~limit: 1
+  ~filter[description]: Hogar
+}
+
+settings {
+  encodeUrl: true
+}

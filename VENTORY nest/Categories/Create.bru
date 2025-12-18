@@ -1,0 +1,22 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/categories
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Niños"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

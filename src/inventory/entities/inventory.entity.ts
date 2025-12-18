@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
 import { Item } from '../../items/entities/item.entity';
+import { Purchase } from '../../purchases/entities/purchase.entity';
 
 @Entity('inventories')
 export class Inventory {
@@ -17,20 +18,24 @@ export class Inventory {
   id: number;
 
   @Column({ name: 'product_id', nullable: false })
-  productId: number;
+  product_id: number;
 
-  @Column({ name: 'purchase_id', type: 'int', nullable: true })
-  purchaseId: number;
+  @Column({ name: 'purchase_id', type: 'int', nullable: false })
+  purchase_id: number;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updated_at: Date;
 
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  @ManyToOne(() => Purchase, (purchase) => purchase.inventories)
+  @JoinColumn({ name: 'purchase_id' })
+  purchase: Purchase;
 
   @OneToMany(() => Item, (item) => item.inventory, {
     cascade: true,
