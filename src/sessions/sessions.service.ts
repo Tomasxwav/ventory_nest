@@ -59,4 +59,17 @@ export class SessionsService {
   async deleteUserSessions(userId: number): Promise<void> {
     await this.sessionsRepository.delete({ userId });
   }
+
+  async revokeSession(accessToken: string): Promise<boolean> {
+    const session = await this.sessionsRepository.findOne({
+      where: { accessToken },
+    });
+
+    if (session) {
+      await this.sessionsRepository.remove(session);
+      return true;
+    }
+
+    return false;
+  }
 }
