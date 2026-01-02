@@ -10,6 +10,8 @@ import {
   IsPositive,
   Min,
   Length,
+  IsBoolean,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -51,12 +53,42 @@ export class PurchaseProductDto {
   @Min(1, { message: 'La cantidad debe ser al menos 1' })
   quantity: number;
 
-  @IsNotEmpty({ message: 'Los items son requeridos' })
+  @IsNotEmpty({ message: 'El campo serialized es requerido' })
+  @IsBoolean({ message: 'El campo serialized debe ser un booleano' })
+  serialized: boolean;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsNotEmpty({ message: 'El costo de compra es requerido cuando serialized es false' })
+  @IsNumber({ maxDecimalPlaces: 4 }, { message: 'El costo de compra debe ser un número válido' })
+  @IsPositive({ message: 'El costo de compra debe ser mayor a 0' })
+  purchaseCost?: number;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsNotEmpty({ message: 'El costo de venta es requerido cuando serialized es false' })
+  @IsNumber({ maxDecimalPlaces: 4 }, { message: 'El costo de venta debe ser un número válido' })
+  @IsPositive({ message: 'El costo de venta debe ser mayor a 0' })
+  saleCost?: number;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsOptional()
+  @IsString({ message: 'La moneda de compra debe ser un texto' })
+  @Length(3, 10, { message: 'La moneda de compra debe tener entre 3 y 10 caracteres' })
+  purchaseCurrency?: string;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsOptional()
+  @IsString({ message: 'La moneda de venta debe ser un texto' })
+  @Length(3, 10, { message: 'La moneda de venta debe tener entre 3 y 10 caracteres' })
+  saleCurrency?: string;
+
+  // Solo requerido si serialized = true
+  @ValidateIf((o) => o.serialized)
+  @IsNotEmpty({ message: 'Los items son requeridos cuando serialized es true' })
   @IsArray({ message: 'Los items deben ser un arreglo' })
   @ValidateNested({ each: true })
-  @ArrayMinSize(1, { message: 'Debe haber al menos un item' })
+  @ArrayMinSize(1, { message: 'Debe haber al menos un item cuando serialized es true' })
   @Type(() => CreateItemDto)
-  items: CreateItemDto[];
+  items?: CreateItemDto[];
 }
 
 export class CreatePurchasesDto {

@@ -1,5 +1,5 @@
 import { Inventory } from 'src/inventory/entities/inventory.entity';
-import { Suppliers } from 'src/suppliers/entities/suppliers.entity';
+import { PurchaseOrder } from 'src/purchase-orders/entities/purchase-order.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -16,14 +16,14 @@ export class Purchase {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ name: 'purchase_order_id', type: 'int', nullable: true })
+  purchase_order_id: number;
+
   @Column({ length: 255 })
   voucher: string;
 
   @Column({ length: 255 })
   invoice: string;
-
-  @Column({ name: 'supplier_id', type: 'int', nullable: false })
-  supplier_id: number;
 
   @Column({ type: 'text', nullable: true })
   notes: string;
@@ -34,11 +34,9 @@ export class Purchase {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @ManyToOne(() => Suppliers, (supplier) => supplier.purchases, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'supplier_id' })
-  supplier: Suppliers;
+  @ManyToOne(() => PurchaseOrder, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'purchase_order_id' })
+  purchase_order: PurchaseOrder;
 
   @OneToMany(() => Inventory, (inventory) => inventory.purchase, {
     cascade: true,

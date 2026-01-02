@@ -13,6 +13,8 @@ import { AuthModule } from './auth/auth.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { PurchasesModule } from './purchases/purchases.module';
+import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
+import { PurchaseOrdersModule } from './purchase-orders/purchase-orders.module';
 import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
@@ -23,6 +25,10 @@ import { User } from './users/entities/user.entity';
 import { Session } from './sessions/entities/session.entity';
 import { Suppliers } from './suppliers/entities/suppliers.entity';
 import { Purchase } from './purchases/entities/purchase.entity';
+import { PurchaseRequest } from './purchase-requests/entities/purchase-request.entity';
+import { PurchaseRequestItem } from './purchase-requests/entities/purchase-request-item.entity';
+import { PurchaseOrder } from './purchase-orders/entities/purchase-order.entity';
+import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-item.entity';
 
 @Module({
   imports: [
@@ -33,7 +39,22 @@ import { Purchase } from './purchases/entities/purchase.entity';
       username: 'tmartinez',
       password: 'postgres',
       database: 'ventory_nest',
-      entities: [Brand, Category, Subcategory, Product, Inventory, Item, User, Session, Suppliers, Purchase],
+      entities: [
+        Brand,
+        Category,
+        Subcategory,
+        Product,
+        Inventory,
+        Item,
+        User,
+        Session,
+        Suppliers,
+        Purchase,
+        PurchaseRequest,
+        PurchaseRequestItem,
+        PurchaseOrder,
+        PurchaseOrderItem,
+      ],
       synchronize: true,
     }),
     BrandsModule,
@@ -47,6 +68,8 @@ import { Purchase } from './purchases/entities/purchase.entity';
     SessionsModule,
     SuppliersModule,
     PurchasesModule,
+    PurchaseRequestsModule,
+    PurchaseOrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

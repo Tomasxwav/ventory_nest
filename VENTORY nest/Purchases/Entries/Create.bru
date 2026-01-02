@@ -1,0 +1,45 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/purchases
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "voucher": "VOUCHER-001",
+    "invoice": "FAC-2024-001",
+    "supplierId": 1,
+    "notes": "Compra de productos varios",
+    "products": [
+      {
+        "productId": 10,
+        "quantity": 50,
+        "serialized": false,
+        "purchaseCost": 100.50,
+        "saleCost": 150.75,
+        "purchaseCurrency": "USD",
+        "saleCurrency": "USD"
+      },
+      {
+        "productId": 15,
+        "quantity": 30,
+        "serialized": false,
+        "purchaseCost": 25.00,
+        "saleCost": 35.00,
+        "purchaseCurrency": "MXN",
+        "saleCurrency": "MXN"
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

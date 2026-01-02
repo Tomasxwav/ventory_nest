@@ -55,11 +55,22 @@ export class PurchasesService {
         );
       }
 
+      // 3. Validar según el modo (serialized o no)
       for (const productDto of createPurchasesDto.products) {
-        if (productDto.items.length !== productDto.quantity) {
-          throw new BadRequestException(
-            `El producto ${productDto.productId} requiere ${productDto.quantity} items, pero se proporcionaron ${productDto.items.length}`,
-          );
+        if (productDto.serialized) {
+          // Modo serializado: validar que la cantidad de items coincida
+          if (!productDto.items || productDto.items.length !== productDto.quantity) {
+            throw new BadRequestException(
+              `El producto ${productDto.productId} está marcado como serializado y requiere ${productDto.quantity} items, pero se proporcionaron ${productDto.items?.length || 0}`,
+            );
+          }
+        } else {
+          // Modo no serializado: validar que tenga costos
+          if (!productDto.purchaseCost || !productDto.saleCost) {
+            throw new BadRequestException(
+              `El producto ${productDto.productId} no está serializado y requiere purchaseCost y saleCost`,
+            );
+          }
         }
       }
 
@@ -72,9 +83,11 @@ export class PurchasesService {
 
       const savedPurchase = await queryRunner.manager.save(Purchase, purchase);
 
+      // 5. Crear los registros de inventario y sus items
       const inventories = [];
 
       for (const productDto of createPurchasesDto.products) {
+        // Crear el registro de inventario
         const inventory = queryRunner.manager.create(Inventory, {
           product_id: productDto.productId,
           purchase_id: savedPurchase.id,
@@ -85,16 +98,33 @@ export class PurchasesService {
           inventory,
         );
 
-        const items = productDto.items.map((itemDto) =>
-          queryRunner.manager.create(Item, {
-            inventory_id: savedInventory.id,
-            serial_number: itemDto.serialNumber || null,
-            purchase_cost: itemDto.purchaseCost,
-            sale_cost: itemDto.saleCost,
-            purchase_currency: itemDto.purchaseCurrency || 'mxn',
-            sale_currency: itemDto.saleCurrency || 'mxn',
-          }),
-        );
+        let items = [];
+
+        if (productDto.serialized) {
+          // Modo serializado: usar los items proporcionados
+          items = productDto.items.map((itemDto) =>
+            queryRunner.manager.create(Item, {
+              inventory_id: savedInventory.id,
+              serial_number: itemDto.serialNumber || null,
+              purchase_cost: itemDto.purchaseCost,
+              sale_cost: itemDto.saleCost,
+              purchase_currency: itemDto.purchaseCurrency || 'mxn',
+              sale_currency: itemDto.saleCurrency || 'mxn',
+            }),
+          );
+        } else {
+          // Modo no serializado: crear items automáticamente con los mismos costos
+          items = Array.from({ length: productDto.quantity }, () =>
+            queryRunner.manager.create(Item, {
+              inventory_id: savedInventory.id,
+              serial_number: null,
+              purchase_cost: productDto.purchaseCost,
+              sale_cost: productDto.saleCost,
+              purchase_currency: productDto.purchaseCurrency || 'mxn',
+              sale_currency: productDto.saleCurrency || 'mxn',
+            }),
+          );
+        }
 
         await queryRunner.manager.save(Item, items);
         inventories.push(savedInventory);
