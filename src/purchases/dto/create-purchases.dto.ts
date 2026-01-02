@@ -104,10 +104,10 @@ export class CreatePurchasesDto {
   @Length(2, 255, { message: 'La factura debe tener entre 2 y 255 caracteres' })
   invoice: string;
 
-  @IsNotEmpty({ message: 'El ID del proveedor es requerido' })
-  @IsNumber({}, { message: 'El ID del proveedor debe ser un número' })
-  @IsPositive({ message: 'El ID del proveedor debe ser mayor a 0' })
-  supplierId: number;
+  @IsOptional()
+  @IsNumber({}, { message: 'El ID de la orden de compra debe ser un número' })
+  @IsPositive({ message: 'El ID de la orden de compra debe ser mayor a 0' })
+  purchaseOrderId?: number;
 
   @IsOptional()
   @IsString({ message: 'Las notas deben ser un texto' })

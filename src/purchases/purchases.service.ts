@@ -29,61 +29,56 @@ export class PurchasesService {
   ) {}
 
   async create(createPurchasesDto: CreatePurchasesDto) {
+    // Validaciones ANTES de iniciar la transacción
+    const productIds = createPurchasesDto.products.map((p) => p.productId);
+    const products = await this.productRepository.findByIds(productIds);
+
+    if (products.length !== productIds.length) {
+      const foundIds = products.map((p) => p.id);
+      const missingIds = productIds.filter((id) => !foundIds.includes(id));
+      throw new NotFoundException(
+        `Productos no encontrados: ${missingIds.join(', ')}`,
+      );
+    }
+
+    // Validar según el modo (serialized o no)
+    for (const productDto of createPurchasesDto.products) {
+      if (productDto.serialized) {
+        // Modo serializado: validar que la cantidad de items coincida
+        if (
+          !productDto.items ||
+          productDto.items.length !== productDto.quantity
+        ) {
+          throw new BadRequestException(
+            `El producto ${productDto.productId} está marcado como serializado y requiere ${productDto.quantity} items, pero se proporcionaron ${productDto.items?.length || 0}`,
+          );
+        }
+      } else {
+        // Modo no serializado: validar que tenga costos
+        if (!productDto.purchaseCost || !productDto.saleCost) {
+          throw new BadRequestException(
+            `El producto ${productDto.productId} no está serializado y requiere purchaseCost y saleCost`,
+          );
+        }
+      }
+    }
+
+    // Iniciar transacción después de las validaciones
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const supplier = await this.suppliersRepository.findOne({
-        where: { id: createPurchasesDto.supplierId },
-      });
-
-      if (!supplier) {
-        throw new NotFoundException(
-          `Proveedor con ID ${createPurchasesDto.supplierId} no encontrado`,
-        );
-      }
-
-      const productIds = createPurchasesDto.products.map((p) => p.productId);
-      const products = await this.productRepository.findByIds(productIds);
-
-      if (products.length !== productIds.length) {
-        const foundIds = products.map((p) => p.id);
-        const missingIds = productIds.filter((id) => !foundIds.includes(id));
-        throw new NotFoundException(
-          `Productos no encontrados: ${missingIds.join(', ')}`,
-        );
-      }
-
-      // 3. Validar según el modo (serialized o no)
-      for (const productDto of createPurchasesDto.products) {
-        if (productDto.serialized) {
-          // Modo serializado: validar que la cantidad de items coincida
-          if (!productDto.items || productDto.items.length !== productDto.quantity) {
-            throw new BadRequestException(
-              `El producto ${productDto.productId} está marcado como serializado y requiere ${productDto.quantity} items, pero se proporcionaron ${productDto.items?.length || 0}`,
-            );
-          }
-        } else {
-          // Modo no serializado: validar que tenga costos
-          if (!productDto.purchaseCost || !productDto.saleCost) {
-            throw new BadRequestException(
-              `El producto ${productDto.productId} no está serializado y requiere purchaseCost y saleCost`,
-            );
-          }
-        }
-      }
-
       const purchase = queryRunner.manager.create(Purchase, {
         voucher: createPurchasesDto.voucher,
         invoice: createPurchasesDto.invoice,
-        supplier_id: createPurchasesDto.supplierId,
+        purchase_order_id: createPurchasesDto.purchaseOrderId || null,
         notes: createPurchasesDto.notes,
       });
 
       const savedPurchase = await queryRunner.manager.save(Purchase, purchase);
 
-      // 5. Crear los registros de inventario y sus items
+      // Crear los registros de inventario y sus items
       const inventories = [];
 
       for (const productDto of createPurchasesDto.products) {
@@ -136,11 +131,19 @@ export class PurchasesService {
       // Retornar la compra completa con sus relaciones
       return await this.purchaseRepository.findOne({
         where: { id: savedPurchase.id },
-        relations: ['supplier', 'inventories', 'inventories.items', 'inventories.product'],
+        relations: [
+          'purchase_order',
+          'purchase_order.supplier',
+          'inventories',
+          'inventories.items',
+          'inventories.product',
+        ],
       });
     } catch (error) {
       // Rollback en caso de error
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       throw error;
     } finally {
       // Liberar el queryRunner
@@ -150,7 +153,14 @@ export class PurchasesService {
 
   async findAll() {
     return await this.purchaseRepository.find({
-      relations: ['supplier', 'inventories', 'inventories.product'],
+      relations: [
+        'purchase_order',
+        'purchase_order.supplier',
+        'purchase_order.created_by',
+        'inventories',
+        'inventories.product',
+        'inventories.items',
+      ],
       order: { created_at: 'DESC' },
     });
   }
@@ -158,7 +168,14 @@ export class PurchasesService {
   async findOne(id: number) {
     const purchase = await this.purchaseRepository.findOne({
       where: { id },
-      relations: ['supplier', 'inventories', 'inventories.items', 'inventories.product'],
+      relations: [
+        'purchase_order',
+        'purchase_order.supplier',
+        'purchase_order.created_by',
+        'inventories',
+        'inventories.items',
+        'inventories.product',
+      ],
     });
 
     if (!purchase) {
