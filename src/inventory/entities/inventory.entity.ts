@@ -20,7 +20,7 @@ export class Inventory {
   @Column({ name: 'product_id', nullable: false })
   product_id: number;
 
-  @Column({ name: 'purchase_id', type: 'int', nullable: false })
+  @Column({ name: 'purchase_id', type: 'int', nullable: true })
   purchase_id: number;
 
   @CreateDateColumn({ name: 'created_at' })
@@ -33,7 +33,9 @@ export class Inventory {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => Purchase, (purchase) => purchase.inventories)
+  @ManyToOne(() => Purchase, (purchase) => purchase.inventories, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'purchase_id' })
   purchase: Purchase;
 

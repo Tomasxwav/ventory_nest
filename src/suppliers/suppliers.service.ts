@@ -12,15 +12,16 @@ export class SuppliersService {
   ) {}
 
   async create(createSupplierDto: CreateSupplierDto): Promise<Suppliers> {
-    const existingCategory = await this.suppliersRepository.findOne({
+    const existingSupplier = await this.suppliersRepository.findOne({
       where: { name: createSupplierDto.name },
     });
 
-    if (existingCategory) {
-      throw new ConflictException('Ya existe una categoría con ese nombre');
+    if (existingSupplier) {
+      throw new ConflictException('Ya existe un proveedor con ese nombre');
     }
 
-    return this.suppliersRepository.create();
+    const supplier = this.suppliersRepository.create(createSupplierDto);
+    return this.suppliersRepository.save(supplier);
   }
 
   async findAll(): Promise<any[]> {

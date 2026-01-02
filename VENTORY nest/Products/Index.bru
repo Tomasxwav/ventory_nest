@@ -7,7 +7,7 @@ meta {
 get {
   url: {{url}}/products
   body: none
-  auth: bearer
+  auth: inherit
 }
 
 params:query {
@@ -24,10 +24,7 @@ params:query {
   ~limit: 1
 }
 
-auth:bearer {
-  token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3NjM1OTM2MDl9.7y2Z58sA7qk5Y-yeJuvn3tEYZk2faWxFUwqnQX3aTHY
-}
-
 settings {
   encodeUrl: true
+  timeout: 0
 }

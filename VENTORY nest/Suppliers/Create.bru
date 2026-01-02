@@ -6,10 +6,28 @@ meta {
 
 post {
   url: {{url}}/suppliers
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "name": "Distribuidora Tech Solutions",
+    "email": "ventas@techsolutions.com",
+    "website": "https://www.techsolutions.com",
+    "phone": "+52 81 8888 9999",
+    "street": "Blvd. Tecnológico",
+    "street_number": "456",
+    "apartment": "Piso 3",
+    "neighborhood": "Parque Industrial",
+    "city": "Monterrey",
+    "state": "Nuevo León",
+    "postal_code": "64000",
+    "country": "México"
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

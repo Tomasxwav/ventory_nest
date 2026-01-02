@@ -123,20 +123,21 @@ export class ProductsService {
       return;
     }
 
-    // Crear el inventario
+    // Crear el inventario usando el nombre correcto de la columna
     const inventory = this.inventoryRepository.create({
-      productId: product.id,
+      product_id: product.id,
+      purchase_id: null, // Se asignará cuando se haga una compra
     });
 
     const savedInventory = await this.inventoryRepository.save(inventory);
 
     // Crear el item
     const item = this.itemRepository.create({
-      inventoryId: savedInventory.id,
-      saleCost: createProductDto.sale_cost,
-      purchaseCost: createProductDto.purchase_cost,
-      saleCurrency: createProductDto.sale_currency,
-      purchaseCurrency: createProductDto.purchase_currency,
+      inventory_id: savedInventory.id,
+      sale_cost: createProductDto.sale_cost,
+      purchase_cost: createProductDto.purchase_cost,
+      sale_currency: createProductDto.sale_currency,
+      purchase_currency: createProductDto.purchase_currency,
     });
 
     await this.itemRepository.save(item);
