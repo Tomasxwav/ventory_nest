@@ -8,6 +8,7 @@ import { Item } from '../items/entities/item.entity';
 import { Product } from '../products/entities/product.entity';
 import { Suppliers } from '../suppliers/entities/suppliers.entity';
 import { PurchaseOrder } from '../purchase-orders/entities/purchase-order.entity';
+import { PurchaseOrderItem } from '../purchase-orders/entities/purchase-order-item.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PurchaseOrder } from '../purchase-orders/entities/purchase-order.entity
       Product,
       Suppliers,
       PurchaseOrder,
+      PurchaseOrderItem,
     ]),
   ],
   controllers: [PurchasesController],

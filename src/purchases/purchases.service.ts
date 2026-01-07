@@ -11,6 +11,8 @@ import { Inventory } from '../inventory/entities/inventory.entity';
 import { Item } from '../items/entities/item.entity';
 import { Product } from '../products/entities/product.entity';
 import { Suppliers } from '../suppliers/entities/suppliers.entity';
+import { PurchaseOrder, PurchaseOrderStatus } from '../purchase-orders/entities/purchase-order.entity';
+import { PurchaseOrderItem } from '../purchase-orders/entities/purchase-order-item.entity';
 
 @Injectable()
 export class PurchasesService {
@@ -25,6 +27,10 @@ export class PurchasesService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(Suppliers)
     private readonly suppliersRepository: Repository<Suppliers>,
+    @InjectRepository(PurchaseOrder)
+    private readonly purchaseOrderRepository: Repository<PurchaseOrder>,
+    @InjectRepository(PurchaseOrderItem)
+    private readonly purchaseOrderItemRepository: Repository<PurchaseOrderItem>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -51,13 +57,6 @@ export class PurchasesService {
         ) {
           throw new BadRequestException(
             `El producto ${productDto.productId} está marcado como serializado y requiere ${productDto.quantity} items, pero se proporcionaron ${productDto.items?.length || 0}`,
-          );
-        }
-      } else {
-        // Modo no serializado: validar que tenga costos
-        if (!productDto.purchaseCost || !productDto.saleCost) {
-          throw new BadRequestException(
-            `El producto ${productDto.productId} no está serializado y requiere purchaseCost y saleCost`,
           );
         }
       }
@@ -96,33 +95,42 @@ export class PurchasesService {
         let items = [];
 
         if (productDto.serialized) {
-          // Modo serializado: usar los items proporcionados
+          // Modo serializado: usar los serial numbers proporcionados
           items = productDto.items.map((itemDto) =>
             queryRunner.manager.create(Item, {
               inventory_id: savedInventory.id,
-              serial_number: itemDto.serialNumber || null,
-              purchase_cost: itemDto.purchaseCost,
-              sale_cost: itemDto.saleCost,
-              purchase_currency: itemDto.purchaseCurrency || 'mxn',
-              sale_currency: itemDto.saleCurrency || 'mxn',
+              serial_number: itemDto.serialNumber,
+              purchase_cost: null,
+              sale_cost: null,
+              purchase_currency: null,
+              sale_currency: null,
             }),
           );
         } else {
-          // Modo no serializado: crear items automáticamente con los mismos costos
+          // Modo no serializado: crear items automáticamente sin serial number
           items = Array.from({ length: productDto.quantity }, () =>
             queryRunner.manager.create(Item, {
               inventory_id: savedInventory.id,
               serial_number: null,
-              purchase_cost: productDto.purchaseCost,
-              sale_cost: productDto.saleCost,
-              purchase_currency: productDto.purchaseCurrency || 'mxn',
-              sale_currency: productDto.saleCurrency || 'mxn',
+              purchase_cost: null,
+              sale_cost: null,
+              purchase_currency: null,
+              sale_currency: null,
             }),
           );
         }
 
         await queryRunner.manager.save(Item, items);
         inventories.push(savedInventory);
+      }
+
+      // Actualizar el estado de la orden de compra si existe
+      if (createPurchasesDto.purchaseOrderId) {
+        await this.updatePurchaseOrderStatus(
+          queryRunner,
+          createPurchasesDto.purchaseOrderId,
+          createPurchasesDto.products,
+        );
       }
 
       // Commit de la transacción
@@ -189,5 +197,76 @@ export class PurchasesService {
     const purchase = await this.findOne(id);
     await this.purchaseRepository.remove(purchase);
     return { message: `Compra con ID ${id} eliminada exitosamente` };
+  }
+
+  /**
+   * Actualiza el estado de una orden de compra basándose en las cantidades recibidas
+   * - Si la cantidad recibida es 0: estado = CANCELADA
+   * - Si la cantidad recibida es menor que la ordenada: estado = PARCIAL
+   * - Si la cantidad recibida es igual a la ordenada: estado = COMPLETA
+   */
+  private async updatePurchaseOrderStatus(
+    queryRunner: any,
+    purchaseOrderId: number,
+    purchasedProducts: Array<{ productId: number; quantity: number }>,
+  ) {
+    // Obtener la orden de compra con sus items
+    const purchaseOrder = await queryRunner.manager.findOne(PurchaseOrder, {
+      where: { id: purchaseOrderId },
+      relations: ['items'],
+    });
+
+    if (!purchaseOrder) {
+      throw new NotFoundException(
+        `Orden de compra con ID ${purchaseOrderId} no encontrada`,
+      );
+    }
+
+    // Actualizar las cantidades recibidas de cada item
+    for (const purchasedProduct of purchasedProducts) {
+      const orderItem = purchaseOrder.items.find(
+        (item) => item.product_id === purchasedProduct.productId,
+      );
+
+      if (orderItem) {
+        // Incrementar la cantidad recibida
+        orderItem.received_quantity = Number(orderItem.received_quantity) + purchasedProduct.quantity;
+        await queryRunner.manager.save(PurchaseOrderItem, orderItem);
+      }
+    }
+
+    // Determinar el nuevo estado de la orden de compra
+    let newStatus: PurchaseOrderStatus;
+
+    // Verificar si todas las cantidades son 0 (cancelado)
+    const allZero = purchaseOrder.items.every(
+      (item) => Number(item.received_quantity) === 0,
+    );
+
+    // Verificar si todas las cantidades están completas
+    const allComplete = purchaseOrder.items.every(
+      (item) => Number(item.received_quantity) >= Number(item.quantity),
+    );
+
+    // Verificar si hay cantidades parciales
+    const hasPartial = purchaseOrder.items.some(
+      (item) =>
+        Number(item.received_quantity) > 0 &&
+        Number(item.received_quantity) < Number(item.quantity),
+    );
+
+    if (allZero) {
+      newStatus = PurchaseOrderStatus.CANCELADA;
+    } else if (allComplete) {
+      newStatus = PurchaseOrderStatus.COMPLETA;
+    } else if (hasPartial || purchaseOrder.items.some(item => Number(item.received_quantity) > 0)) {
+      newStatus = PurchaseOrderStatus.PARCIAL;
+    } else {
+      newStatus = PurchaseOrderStatus.PENDIENTE;
+    }
+
+    // Actualizar el estado de la orden de compra
+    purchaseOrder.status = newStatus;
+    await queryRunner.manager.save(PurchaseOrder, purchaseOrder);
   }
 }

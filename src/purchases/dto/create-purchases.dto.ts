@@ -16,30 +16,10 @@ import {
 import { Type } from 'class-transformer';
 
 export class CreateItemDto {
-  @IsOptional()
+  @IsNotEmpty({ message: 'El número de serie es requerido' })
   @IsString({ message: 'El número de serie debe ser un texto' })
   @Length(1, 255, { message: 'El número de serie debe tener entre 1 y 255 caracteres' })
-  serialNumber?: string;
-
-  @IsNotEmpty({ message: 'El costo de compra es requerido' })
-  @IsNumber({ maxDecimalPlaces: 4 }, { message: 'El costo de compra debe ser un número válido' })
-  @IsPositive({ message: 'El costo de compra debe ser mayor a 0' })
-  purchaseCost: number;
-
-  @IsNotEmpty({ message: 'El costo de venta es requerido' })
-  @IsNumber({ maxDecimalPlaces: 4 }, { message: 'El costo de venta debe ser un número válido' })
-  @IsPositive({ message: 'El costo de venta debe ser mayor a 0' })
-  saleCost: number;
-
-  @IsOptional()
-  @IsString({ message: 'La moneda de compra debe ser un texto' })
-  @Length(3, 10, { message: 'La moneda de compra debe tener entre 3 y 10 caracteres' })
-  purchaseCurrency?: string;
-
-  @IsOptional()
-  @IsString({ message: 'La moneda de venta debe ser un texto' })
-  @Length(3, 10, { message: 'La moneda de venta debe tener entre 3 y 10 caracteres' })
-  saleCurrency?: string;
+  serialNumber: string;
 }
 
 export class PurchaseProductDto {
@@ -56,30 +36,6 @@ export class PurchaseProductDto {
   @IsNotEmpty({ message: 'El campo serialized es requerido' })
   @IsBoolean({ message: 'El campo serialized debe ser un booleano' })
   serialized: boolean;
-
-  @ValidateIf((o) => !o.serialized)
-  @IsNotEmpty({ message: 'El costo de compra es requerido cuando serialized es false' })
-  @IsNumber({ maxDecimalPlaces: 4 }, { message: 'El costo de compra debe ser un número válido' })
-  @IsPositive({ message: 'El costo de compra debe ser mayor a 0' })
-  purchaseCost?: number;
-
-  @ValidateIf((o) => !o.serialized)
-  @IsNotEmpty({ message: 'El costo de venta es requerido cuando serialized es false' })
-  @IsNumber({ maxDecimalPlaces: 4 }, { message: 'El costo de venta debe ser un número válido' })
-  @IsPositive({ message: 'El costo de venta debe ser mayor a 0' })
-  saleCost?: number;
-
-  @ValidateIf((o) => !o.serialized)
-  @IsOptional()
-  @IsString({ message: 'La moneda de compra debe ser un texto' })
-  @Length(3, 10, { message: 'La moneda de compra debe tener entre 3 y 10 caracteres' })
-  purchaseCurrency?: string;
-
-  @ValidateIf((o) => !o.serialized)
-  @IsOptional()
-  @IsString({ message: 'La moneda de venta debe ser un texto' })
-  @Length(3, 10, { message: 'La moneda de venta debe tener entre 3 y 10 caracteres' })
-  saleCurrency?: string;
 
   // Solo requerido si serialized = true
   @ValidateIf((o) => o.serialized)

@@ -12,19 +12,17 @@ post {
 
 body:json {
   {
-    "order_number": "PO-2026-001",
-    "purchase_request_id": 1,
-    "supplier_id": 3,
-    "currency": "MXN",
-    "expected_date": "2026-01-15",
-    "taxes": 150.00,
-    "created_by_id": 1,
-    "items": [
+    "voucher": "V-001",
+    "invoice": "F-001",
+    "products": [
       {
-        "productId": 5,
-        "quantity": 100,
-        "unit_price": 10.50,
-        "unit_of_measure": "pcs"
+        "productId": 1,
+        "quantity": 2,
+        "serialized": true,
+        "items": [
+          { "serialNumber": "SN001" },
+          { "serialNumber": "SN002" }
+        ]
       }
     ]
   }
