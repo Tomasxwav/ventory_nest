@@ -19,6 +19,8 @@ import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
 import { Product } from './products/entities/product.entity';
+import { ProductCategory } from './products/entities/product-category.entity';
+import { ProductSubcategory } from './products/entities/product-subcategory.entity';
 import { Inventory } from './inventory/entities/inventory.entity';
 import { Item } from './items/entities/item.entity';
 import { User } from './users/entities/user.entity';
@@ -44,6 +46,8 @@ import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-ite
         Category,
         Subcategory,
         Product,
+        ProductCategory,
+        ProductSubcategory,
         Inventory,
         Item,
         User,

@@ -7,7 +7,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
+import { ProductCategory } from './entities/product-category.entity';
+import { ProductSubcategory } from './entities/product-subcategory.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { AddCategoryToProductDto } from './dto/add-category-to-product.dto';
+import { AddSubcategoryToProductDto } from './dto/add-subcategory-to-product.dto';
 import { Brand } from '../brands/entities/brand.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
@@ -21,6 +26,10 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductCategory)
+    private readonly productCategoryRepository: Repository<ProductCategory>,
+    @InjectRepository(ProductSubcategory)
+    private readonly productSubcategoryRepository: Repository<ProductSubcategory>,
     @InjectRepository(Brand)
     private readonly brandRepository: Repository<Brand>,
     @InjectRepository(Category)
@@ -55,22 +64,28 @@ export class ProductsService {
       throw new NotFoundException('La marca no existe');
     }
 
-    // Verificar si la categoría existe
-    const category = await this.categoryRepository.findOne({
-      where: { id: createProductDto.category_id },
-    });
-
-    if (!category) {
-      throw new NotFoundException('La categoría no existe');
+    // Verificar categorías si se proporcionaron
+    if (createProductDto.category_ids && createProductDto.category_ids.length > 0) {
+      for (const categoryId of createProductDto.category_ids) {
+        const category = await this.categoryRepository.findOne({
+          where: { id: categoryId },
+        });
+        if (!category) {
+          throw new NotFoundException(`La categoría con ID ${categoryId} no existe`);
+        }
+      }
     }
 
-    // Verificar si la subcategoría existe
-    const subcategory = await this.subcategoryRepository.findOne({
-      where: { id: createProductDto.subcategory_id },
-    });
-
-    if (!subcategory) {
-      throw new NotFoundException('La subcategoría no existe');
+    // Verificar subcategorías si se proporcionaron
+    if (createProductDto.subcategory_ids && createProductDto.subcategory_ids.length > 0) {
+      for (const subcategoryId of createProductDto.subcategory_ids) {
+        const subcategory = await this.subcategoryRepository.findOne({
+          where: { id: subcategoryId },
+        });
+        if (!subcategory) {
+          throw new NotFoundException(`La subcategoría con ID ${subcategoryId} no existe`);
+        }
+      }
     }
 
     // Manejar la imagen si se proporcionó
@@ -93,12 +108,32 @@ export class ProductsService {
       stock: createProductDto.stock,
       sku: createProductDto.sku,
       brand_id: createProductDto.brand_id,
-      category_id: createProductDto.category_id,
-      subcategory_id: createProductDto.subcategory_id,
       image: imagePath,
     });
 
     const savedProduct = await this.productRepository.save(product);
+
+    // Crear relaciones N:M con categorías
+    if (createProductDto.category_ids && createProductDto.category_ids.length > 0) {
+      for (const categoryId of createProductDto.category_ids) {
+        const productCategory = this.productCategoryRepository.create({
+          product_id: savedProduct.id,
+          category_id: categoryId,
+        });
+        await this.productCategoryRepository.save(productCategory);
+      }
+    }
+
+    // Crear relaciones N:M con subcategorías
+    if (createProductDto.subcategory_ids && createProductDto.subcategory_ids.length > 0) {
+      for (const subcategoryId of createProductDto.subcategory_ids) {
+        const productSubcategory = this.productSubcategoryRepository.create({
+          product_id: savedProduct.id,
+          subcategory_id: subcategoryId,
+        });
+        await this.productSubcategoryRepository.save(productSubcategory);
+      }
+    }
 
     // Crear inventario e item si se proporcionaron los parámetros opcionales
     await this.createInventoryIfNeeded(savedProduct, createProductDto);
@@ -201,5 +236,286 @@ export class ProductsService {
     }
 
     return imagePath;
+  }
+
+  // ==================== MÉTODOS PARA UPDATE ====================
+
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+    file?: Express.Multer.File,
+  ): Promise<Product> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    // Verificar si la marca existe (si se proporciona)
+    if (updateProductDto.brand_id) {
+      const brand = await this.brandRepository.findOne({
+        where: { id: updateProductDto.brand_id },
+      });
+      if (!brand) {
+        throw new NotFoundException('La marca no existe');
+      }
+    }
+
+    // Manejar la imagen si se proporcionó
+    if (file) {
+      // Eliminar imagen anterior si existe
+      if (product.image) {
+        const oldImagePath = path.join(
+          process.cwd(),
+          'uploads',
+          'products',
+          product.image,
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      updateProductDto.image = file.filename;
+    }
+
+    // Actualizar campos básicos del producto
+    Object.assign(product, updateProductDto);
+    const updatedProduct = await this.productRepository.save(product);
+
+    // Actualizar categorías si se proporcionaron
+    if (updateProductDto.category_ids !== undefined) {
+      await this.updateProductCategories(id, updateProductDto.category_ids);
+    }
+
+    // Actualizar subcategorías si se proporcionaron
+    if (updateProductDto.subcategory_ids !== undefined) {
+      await this.updateProductSubcategories(id, updateProductDto.subcategory_ids);
+    }
+
+    return updatedProduct;
+  }
+
+  private async updateProductCategories(
+    productId: number,
+    categoryIds: number[],
+  ): Promise<void> {
+    // Eliminar todas las categorías actuales
+    await this.productCategoryRepository.delete({ product_id: productId });
+
+    // Agregar las nuevas categorías
+    if (categoryIds && categoryIds.length > 0) {
+      for (const categoryId of categoryIds) {
+        const category = await this.categoryRepository.findOne({
+          where: { id: categoryId },
+        });
+        if (!category) {
+          throw new NotFoundException(`La categoría con ID ${categoryId} no existe`);
+        }
+
+        const productCategory = this.productCategoryRepository.create({
+          product_id: productId,
+          category_id: categoryId,
+        });
+        await this.productCategoryRepository.save(productCategory);
+      }
+    }
+  }
+
+  private async updateProductSubcategories(
+    productId: number,
+    subcategoryIds: number[],
+  ): Promise<void> {
+    // Eliminar todas las subcategorías actuales
+    await this.productSubcategoryRepository.delete({ product_id: productId });
+
+    // Agregar las nuevas subcategorías
+    if (subcategoryIds && subcategoryIds.length > 0) {
+      for (const subcategoryId of subcategoryIds) {
+        const subcategory = await this.subcategoryRepository.findOne({
+          where: { id: subcategoryId },
+        });
+        if (!subcategory) {
+          throw new NotFoundException(
+            `La subcategoría con ID ${subcategoryId} no existe`,
+          );
+        }
+
+        const productSubcategory = this.productSubcategoryRepository.create({
+          product_id: productId,
+          subcategory_id: subcategoryId,
+        });
+        await this.productSubcategoryRepository.save(productSubcategory);
+      }
+    }
+  }
+
+  // ==================== MÉTODOS PARA GESTIONAR CATEGORÍAS ====================
+
+  async addCategoriesToProduct(
+    productId: number,
+    addCategoryDto: AddCategoryToProductDto,
+  ): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    for (const categoryId of addCategoryDto.category_ids) {
+      // Verificar que la categoría existe
+      const category = await this.categoryRepository.findOne({
+        where: { id: categoryId },
+      });
+
+      if (!category) {
+        throw new NotFoundException(`La categoría con ID ${categoryId} no existe`);
+      }
+
+      // Verificar si ya existe la relación
+      const existingRelation = await this.productCategoryRepository.findOne({
+        where: { product_id: productId, category_id: categoryId },
+      });
+
+      if (existingRelation) {
+        throw new ConflictException(
+          `El producto ya tiene asignada la categoría con ID ${categoryId}`,
+        );
+      }
+
+      // Crear la relación
+      const productCategory = this.productCategoryRepository.create({
+        product_id: productId,
+        category_id: categoryId,
+      });
+
+      await this.productCategoryRepository.save(productCategory);
+    }
+  }
+
+  async removeCategoryFromProduct(
+    productId: number,
+    categoryId: number,
+  ): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    const relation = await this.productCategoryRepository.findOne({
+      where: { product_id: productId, category_id: categoryId },
+    });
+
+    if (!relation) {
+      throw new NotFoundException(
+        'El producto no tiene asignada esta categoría',
+      );
+    }
+
+    await this.productCategoryRepository.remove(relation);
+  }
+
+  async getProductCategories(productId: number): Promise<Category[]> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+      relations: ['productCategories', 'productCategories.category'],
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    return product.productCategories.map((pc) => pc.category);
+  }
+
+  // ==================== MÉTODOS PARA GESTIONAR SUBCATEGORÍAS ====================
+
+  async addSubcategoriesToProduct(
+    productId: number,
+    addSubcategoryDto: AddSubcategoryToProductDto,
+  ): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    for (const subcategoryId of addSubcategoryDto.subcategory_ids) {
+      // Verificar que la subcategoría existe
+      const subcategory = await this.subcategoryRepository.findOne({
+        where: { id: subcategoryId },
+      });
+
+      if (!subcategory) {
+        throw new NotFoundException(
+          `La subcategoría con ID ${subcategoryId} no existe`,
+        );
+      }
+
+      // Verificar si ya existe la relación
+      const existingRelation = await this.productSubcategoryRepository.findOne({
+        where: { product_id: productId, subcategory_id: subcategoryId },
+      });
+
+      if (existingRelation) {
+        throw new ConflictException(
+          `El producto ya tiene asignada la subcategoría con ID ${subcategoryId}`,
+        );
+      }
+
+      // Crear la relación
+      const productSubcategory = this.productSubcategoryRepository.create({
+        product_id: productId,
+        subcategory_id: subcategoryId,
+      });
+
+      await this.productSubcategoryRepository.save(productSubcategory);
+    }
+  }
+
+  async removeSubcategoryFromProduct(
+    productId: number,
+    subcategoryId: number,
+  ): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    const relation = await this.productSubcategoryRepository.findOne({
+      where: { product_id: productId, subcategory_id: subcategoryId },
+    });
+
+    if (!relation) {
+      throw new NotFoundException(
+        'El producto no tiene asignada esta subcategoría',
+      );
+    }
+
+    await this.productSubcategoryRepository.remove(relation);
+  }
+
+  async getProductSubcategories(productId: number): Promise<Subcategory[]> {
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+      relations: ['productSubcategories', 'productSubcategories.subcategory'],
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    return product.productSubcategories.map((ps) => ps.subcategory);
   }
 }

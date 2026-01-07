@@ -9,9 +9,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Brand } from '../../brands/entities/brand.entity';
-import { Category } from '../../categories/entities/category.entity';
-import { Subcategory } from '../../subcategories/entities/subcategory.entity';
 import { Inventory } from '../../inventory/entities/inventory.entity';
+import { ProductCategory } from './product-category.entity';
+import { ProductSubcategory } from './product-subcategory.entity';
 
 @Entity('products')
 export class Product {
@@ -77,12 +77,6 @@ export class Product {
   @Column({ name: 'brand_id' })
   brand_id: number;
 
-  @Column({ name: 'category_id' })
-  category_id: number;
-
-  @Column({ name: 'subcategory_id' })
-  subcategory_id: number;
-
   @Column({ length: 500, nullable: true })
   image: string;
 
@@ -99,18 +93,13 @@ export class Product {
   @JoinColumn({ name: 'brand_id' })
   brand: Brand;
 
-  @ManyToOne(() => Category, (category) => category.products, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
-
-  @ManyToOne(() => Subcategory, (subcategory) => subcategory.products, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'subcategory_id' })
-  subcategory: Subcategory;
-
   @OneToMany(() => Inventory, (inventory) => inventory.product)
   inventories: Inventory[];
+
+  // Many-to-many relations
+  @OneToMany(() => ProductCategory, (productCategory) => productCategory.product)
+  productCategories: ProductCategory[];
+
+  @OneToMany(() => ProductSubcategory, (productSubcategory) => productSubcategory.product)
+  productSubcategories: ProductSubcategory[];
 }
