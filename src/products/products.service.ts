@@ -189,12 +189,17 @@ export class ProductsService {
         'product.name as name',
         'product.status as status',
         'product.sku as sku',
+        'product.unit_of_measure as unit_of_measure',
+        'product.created_at as created_at',
+        'product.updated_at as updated_at',
         'brand.name as brand_name',
         'CASE WHEN product.image IS NOT NULL AND product.image != \'\' THEN true ELSE false END as image',
         'COALESCE(COUNT(DISTINCT item.id), 0) as product_count',
       ])
       .groupBy('product.id')
       .addGroupBy('brand.name')
+      .addGroupBy('product.created_at')
+      .addGroupBy('product.updated_at')
       .orderBy('product.created_at', 'DESC')
       .offset((page - 1) * limit)
       .limit(limit)
@@ -205,6 +210,9 @@ export class ProductsService {
       name: product.name,
       status: product.status,
       sku: product.sku,
+      unit_of_measure: product.unit_of_measure,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
       brand_name: product.brand_name,
       image: product.image === 'true' || product.image === true || product.image === 1,
       product_count: parseInt(product.product_count) || 0,

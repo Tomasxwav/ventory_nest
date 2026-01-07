@@ -102,8 +102,6 @@ export class ProductsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ): Promise<any[]> {
-    this.logger.log('🔵 GET /products - Petición recibida');
-    this.logger.log(`Parámetros: page=${page}, limit=${limit}`);
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
     return this.productsService.findAll(pageNum, limitNum);

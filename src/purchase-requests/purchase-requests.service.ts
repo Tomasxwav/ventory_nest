@@ -83,7 +83,7 @@ export class PurchaseRequestsService {
 
   async findAll() {
     return await this.purchaseRequestRepository.find({
-      relations: ['items', 'items.product', 'user'],
+      relations: ['items', 'items.product', 'items.product.brand', 'user'],
       order: { created_at: 'DESC' },
     });
   }
