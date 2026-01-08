@@ -15,6 +15,10 @@ export class CreatePurchaseOrderItemDto {
   @IsInt()
   productId: number;
 
+  @IsInt()
+  @IsOptional()
+  purchase_request_item_id?: number;
+
   @IsNumber()
   quantity: number;
 

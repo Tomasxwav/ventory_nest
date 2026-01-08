@@ -12,23 +12,73 @@ post {
 
 body:json {
   {
-    "voucher": "VOUCHER-001",
-    "invoice": "FACTURA-001",
-    "purchaseOrderId": 1,
-    "notes": "Notas opcionales sobre la compra",
-    "products": [
+    "order_number": "PO-2026-002",
+    "purchase_request_id": 1,
+    "supplier_id": 1,
+    "currency": "USD",
+    "expected_date": "2026-03-01T00:00:00.000Z",
+    "status": "pendiente",
+    "subtotal": 12000.00,
+    "taxes": 1920.00,
+    "total": 13920.00,
+    "created_by_id": 1,
+    "items": [
       {
         "productId": 1,
-        "quantity": 10,
-        "serialized": false
+        "purchase_request_item_id": 1,
+        "quantity": 100,
+        "unit_price": 80.00,
+        "unit_of_measure": "piece"
       },
       {
         "productId": 2,
-        "quantity": 5,
-        "serialized": false
+        "purchase_request_item_id": 2,
+        "quantity": 50,
+        "unit_price": 80.00,
+        "unit_of_measure": "piece"
       }
     ]
   }
+  // SIN Purchase Request
+  // {
+  //   "order_number": "PO-2026-001",
+  //   "supplier_id": 1,
+  //   "currency": "MXN",
+  //   "expected_date": "2026-02-15T00:00:00.000Z",
+  //   "status": "pendiente",
+  //   "subtotal": 5000.00,
+  //   "taxes": 800.00,
+  //   "total": 5800.00,
+  //   "created_by_id": 1,
+  //   "items": [
+  //     {
+  //       "productId": 10,
+  //       "quantity": 50,
+  //       "unit_price": 100.00,
+  //       "unit_of_measure": "piezas"
+  //     },
+  //     {
+  //       "productId": 15,
+  //       "quantity": 20,
+  //       "unit_price": 0.00,
+  //       "unit_of_measure": "cajas"
+  //     }
+  //   ]
+  // }
+  // REQUERIDOS
+  // {
+  //   "order_number": "PO-2026-003",
+  //   "supplier_id": 1,
+  //   "created_by_id": 1,
+  //   "items": [
+  //     {
+  //       "productId": 5,
+  //       "quantity": 10,
+  //       "unit_price": 250.00,
+  //       "unit_of_measure": "piezas"
+  //     }
+  //   ]
+  // }
 }
 
 settings {
