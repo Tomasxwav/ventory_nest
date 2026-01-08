@@ -7,7 +7,7 @@ import { PurchaseOrderItem } from './entities/purchase-order-item.entity';
 import { Product } from '../products/entities/product.entity';
 import { Suppliers } from '../suppliers/entities/suppliers.entity';
 import { User } from '../users/entities/user.entity';
-import { PurchaseRequest } from '../purchase-requests/entities/purchase-request.entity';
+import { PurchaseRequest, PurchaseRequestStatus } from '../purchase-requests/entities/purchase-request.entity';
 
 @Injectable()
 export class PurchaseOrdersService {
@@ -61,8 +61,9 @@ export class PurchaseOrdersService {
     }
 
     // Validar que la solicitud de compra exista (si se proporciona)
+    let purchaseRequest = null;
     if (createDto.purchase_request_id) {
-      const purchaseRequest = await this.purchaseRequestRepository.findOne({
+      purchaseRequest = await this.purchaseRequestRepository.findOne({
         where: { id: createDto.purchase_request_id },
       });
 
@@ -113,6 +114,12 @@ export class PurchaseOrdersService {
     });
 
     const savedOrder = await this.purchaseOrderRepository.save(purchaseOrder);
+
+    // Si se creó la orden desde una solicitud de compra, marcarla como convertida
+    if (purchaseRequest) {
+      purchaseRequest.status = PurchaseRequestStatus.CONVERTIDA;
+      await this.purchaseRequestRepository.save(purchaseRequest);
+    }
 
     const items = createDto.items.map((item) =>
       this.purchaseOrderItemRepository.create({
