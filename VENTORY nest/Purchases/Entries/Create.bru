@@ -13,27 +13,19 @@ post {
 body:json {
   {
     "voucher": "VOUCHER-001",
-    "invoice": "FAC-2024-001",
-    "supplierId": 1,
-    "notes": "Compra de productos varios",
+    "invoice": "FACTURA-001",
+    "purchaseOrderId": 2,
+    "notes": "Notas opcionales sobre la compra",
     "products": [
-  //     {
-  //       "productId": 10,
-  //       "quantity": 50,
-  //       "serialized": false,
-  //       "purchaseCost": 100.50,
-  //       "saleCost": 150.75,
-  //       "purchaseCurrency": "USD",
-  //       "saleCurrency": "USD"
-  //     },
       {
         "productId": 1,
-        "quantity": 30,
-        "serialized": false,
-        "purchaseCost": 25.00,
-        "saleCost": 35.00,
-        "purchaseCurrency": "MXN",
-        "saleCurrency": "MXN"
+        "quantity": 12,
+        "serialized": false
+      },
+      {
+        "productId": 2,
+        "quantity": 2,
+        "serialized": false
       }
     ]
   }

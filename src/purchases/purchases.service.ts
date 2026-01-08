@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { CreatePurchasesDto } from './dto/create-purchases.dto';
 import { Purchase } from './entities/purchase.entity';
-import { Inventory } from '../inventory/entities/inventory.entity';
 import { Item } from '../items/entities/item.entity';
 import { Product } from '../products/entities/product.entity';
 import { Suppliers } from '../suppliers/entities/suppliers.entity';
@@ -19,8 +18,6 @@ export class PurchasesService {
   constructor(
     @InjectRepository(Purchase)
     private readonly purchaseRepository: Repository<Purchase>,
-    @InjectRepository(Inventory)
-    private readonly inventoryRepository: Repository<Inventory>,
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
     @InjectRepository(Product)
@@ -77,20 +74,24 @@ export class PurchasesService {
 
       const savedPurchase = await queryRunner.manager.save(Purchase, purchase);
 
-      // Crear los registros de inventario y sus items
-      const inventories = [];
+      // Crear los items directamente sin inventario intermedio
+      const allItems = [];
 
       for (const productDto of createPurchasesDto.products) {
-        // Crear el registro de inventario
-        const inventory = queryRunner.manager.create(Inventory, {
-          product_id: productDto.productId,
-          purchase_id: savedPurchase.id,
-        });
-
-        const savedInventory = await queryRunner.manager.save(
-          Inventory,
-          inventory,
-        );
+        // Buscar el purchase_order_item correspondiente si existe purchase_order_id
+        let purchaseOrderItemId = null;
+        if (createPurchasesDto.purchaseOrderId) {
+          const purchaseOrderItem = await queryRunner.manager.findOne(
+            PurchaseOrderItem,
+            {
+              where: {
+                order_id: createPurchasesDto.purchaseOrderId,
+                product_id: productDto.productId,
+              },
+            },
+          );
+          purchaseOrderItemId = purchaseOrderItem?.id || null;
+        }
 
         let items = [];
 
@@ -98,7 +99,9 @@ export class PurchasesService {
           // Modo serializado: usar los serial numbers proporcionados
           items = productDto.items.map((itemDto) =>
             queryRunner.manager.create(Item, {
-              inventory_id: savedInventory.id,
+              product_id: productDto.productId,
+              purchase_id: savedPurchase.id,
+              purchase_order_item_id: purchaseOrderItemId,
               serial_number: itemDto.serialNumber,
               purchase_cost: null,
               sale_cost: null,
@@ -110,7 +113,9 @@ export class PurchasesService {
           // Modo no serializado: crear items automáticamente sin serial number
           items = Array.from({ length: productDto.quantity }, () =>
             queryRunner.manager.create(Item, {
-              inventory_id: savedInventory.id,
+              product_id: productDto.productId,
+              purchase_id: savedPurchase.id,
+              purchase_order_item_id: purchaseOrderItemId,
               serial_number: null,
               purchase_cost: null,
               sale_cost: null,
@@ -121,7 +126,7 @@ export class PurchasesService {
         }
 
         await queryRunner.manager.save(Item, items);
-        inventories.push(savedInventory);
+        allItems.push(...items);
       }
 
       // Actualizar el estado de la orden de compra si existe
@@ -142,9 +147,9 @@ export class PurchasesService {
         relations: [
           'purchase_order',
           'purchase_order.supplier',
-          'inventories',
-          'inventories.items',
-          'inventories.product',
+          'items',
+          'items.product',
+          'items.purchase_order_item',
         ],
       });
     } catch (error) {
@@ -165,9 +170,9 @@ export class PurchasesService {
         'purchase_order',
         'purchase_order.supplier',
         'purchase_order.created_by',
-        'inventories',
-        'inventories.product',
-        'inventories.items',
+        'items',
+        'items.product',
+        'items.purchase_order_item',
       ],
       order: { created_at: 'DESC' },
     });
@@ -180,9 +185,9 @@ export class PurchasesService {
         'purchase_order',
         'purchase_order.supplier',
         'purchase_order.created_by',
-        'inventories',
-        'inventories.items',
-        'inventories.product',
+        'items',
+        'items.product',
+        'items.purchase_order_item',
       ],
     });
 

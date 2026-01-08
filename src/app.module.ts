@@ -6,7 +6,6 @@ import { BrandsModule } from './brands/brands.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubcategoriesModule } from './subcategories/subcategories.module';
 import { ProductsModule } from './products/products.module';
-import { InventoryModule } from './inventory/inventory.module';
 import { ItemsModule } from './items/items.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -21,7 +20,6 @@ import { Subcategory } from './subcategories/entities/subcategory.entity';
 import { Product } from './products/entities/product.entity';
 import { ProductCategory } from './products/entities/product-category.entity';
 import { ProductSubcategory } from './products/entities/product-subcategory.entity';
-import { Inventory } from './inventory/entities/inventory.entity';
 import { Item } from './items/entities/item.entity';
 import { User } from './users/entities/user.entity';
 import { Session } from './sessions/entities/session.entity';
@@ -48,7 +46,6 @@ import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-ite
         Product,
         ProductCategory,
         ProductSubcategory,
-        Inventory,
         Item,
         User,
         Session,
@@ -65,7 +62,6 @@ import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-ite
     CategoriesModule,
     SubcategoriesModule,
     ProductsModule,
-    InventoryModule,
     ItemsModule,
     UsersModule,
     AuthModule,

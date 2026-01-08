@@ -1,4 +1,5 @@
 import { Product } from 'src/products/entities/product.entity';
+import { PurchaseRequestItem } from 'src/purchase-requests/entities/purchase-request-item.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -18,6 +19,9 @@ export class PurchaseOrderItem {
 
   @Column({ name: 'order_id', type: 'int' })
   order_id: number;
+
+  @Column({ name: 'purchase_request_item_id', type: 'int', nullable: true })
+  purchase_request_item_id: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   quantity: number;
@@ -55,4 +59,8 @@ export class PurchaseOrderItem {
   })
   @JoinColumn({ name: 'order_id' })
   purchase_order: PurchaseOrder;
+
+  @ManyToOne(() => PurchaseRequestItem, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'purchase_request_item_id' })
+  purchase_request_item: PurchaseRequestItem;
 }

@@ -1,5 +1,5 @@
-import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { PurchaseOrder } from 'src/purchase-orders/entities/purchase-order.entity';
+import { Item } from 'src/items/entities/item.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -38,9 +38,9 @@ export class Purchase {
   @JoinColumn({ name: 'purchase_order_id' })
   purchase_order: PurchaseOrder;
 
-  @OneToMany(() => Inventory, (inventory) => inventory.purchase, {
+  @OneToMany(() => Item, (item) => item.purchase, {
     cascade: true,
     eager: false,
   })
-  inventories: Inventory[];
+  items: Item[];
 }

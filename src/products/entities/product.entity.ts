@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Brand } from '../../brands/entities/brand.entity';
-import { Inventory } from '../../inventory/entities/inventory.entity';
+import { Item } from '../../items/entities/item.entity';
 import { ProductCategory } from './product-category.entity';
 import { ProductSubcategory } from './product-subcategory.entity';
 
@@ -93,8 +93,8 @@ export class Product {
   @JoinColumn({ name: 'brand_id' })
   brand: Brand;
 
-  @OneToMany(() => Inventory, (inventory) => inventory.product)
-  inventories: Inventory[];
+  @OneToMany(() => Item, (item) => item.product)
+  items: Item[];
 
   // Many-to-many relations
   @OneToMany(() => ProductCategory, (productCategory) => productCategory.product)

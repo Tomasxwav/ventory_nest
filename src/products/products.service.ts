@@ -16,7 +16,6 @@ import { AddSubcategoryToProductDto } from './dto/add-subcategory-to-product.dto
 import { Brand } from '../brands/entities/brand.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
-import { Inventory } from '../inventory/entities/inventory.entity';
 import { Item } from '../items/entities/item.entity';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -36,8 +35,6 @@ export class ProductsService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Subcategory)
     private readonly subcategoryRepository: Repository<Subcategory>,
-    @InjectRepository(Inventory)
-    private readonly inventoryRepository: Repository<Inventory>,
     @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
   ) {}
@@ -135,55 +132,14 @@ export class ProductsService {
       }
     }
 
-    // Crear inventario e item si se proporcionaron los parámetros opcionales
-    await this.createInventoryIfNeeded(savedProduct, createProductDto);
-
     return savedProduct;
-  }
-
-  private shouldCreateInventory(createProductDto: CreateProductDto): boolean {
-    return !!(
-      createProductDto.sale_cost ||
-      createProductDto.purchase_cost ||
-      createProductDto.sale_currency !== undefined ||
-      createProductDto.purchase_currency !== undefined
-    );
-  }
-
-  private async createInventoryIfNeeded(
-    product: Product,
-    createProductDto: CreateProductDto,
-  ): Promise<void> {
-    if (!this.shouldCreateInventory(createProductDto)) {
-      return;
-    }
-
-    // Crear el inventario usando el nombre correcto de la columna
-    const inventory = this.inventoryRepository.create({
-      product_id: product.id,
-      purchase_id: null, // Se asignará cuando se haga una compra
-    });
-
-    const savedInventory = await this.inventoryRepository.save(inventory);
-
-    // Crear el item
-    const item = this.itemRepository.create({
-      inventory_id: savedInventory.id,
-      sale_cost: createProductDto.sale_cost,
-      purchase_cost: createProductDto.purchase_cost,
-      sale_currency: createProductDto.sale_currency,
-      purchase_currency: createProductDto.purchase_currency,
-    });
-
-    await this.itemRepository.save(item);
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<any[]> {
     const products = await this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.brand', 'brand')
-      .leftJoin('product.inventories', 'inventory')
-      .leftJoin('inventory.items', 'item')
+      .leftJoin('product.items', 'item')
       .select([
         'product.id as id',
         'product.name as name',

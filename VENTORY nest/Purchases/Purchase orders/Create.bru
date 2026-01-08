@@ -12,17 +12,20 @@ post {
 
 body:json {
   {
-    "voucher": "V-001",
-    "invoice": "F-001",
+    "voucher": "VOUCHER-001",
+    "invoice": "FACTURA-001",
+    "purchaseOrderId": 1,
+    "notes": "Notas opcionales sobre la compra",
     "products": [
       {
         "productId": 1,
-        "quantity": 2,
-        "serialized": true,
-        "items": [
-          { "serialNumber": "SN001" },
-          { "serialNumber": "SN002" }
-        ]
+        "quantity": 10,
+        "serialized": false
+      },
+      {
+        "productId": 2,
+        "quantity": 5,
+        "serialized": false
       }
     ]
   }

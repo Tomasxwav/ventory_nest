@@ -18,14 +18,14 @@ export class ItemsService {
 
   async findAll(): Promise<Item[]> {
     return await this.itemRepository.find({
-      relations: ['inventory'],
+      relations: ['product', 'purchase', 'purchase_order_item'],
     });
   }
 
   async findOne(id: number): Promise<Item> {
     const item = await this.itemRepository.findOne({
       where: { id },
-      relations: ['inventory'],
+      relations: ['product', 'purchase', 'purchase_order_item'],
     });
 
     if (!item) {
@@ -35,10 +35,17 @@ export class ItemsService {
     return item;
   }
 
-  async findByInventory(inventoryId: number): Promise<Item[]> {
+  async findByProduct(productId: number): Promise<Item[]> {
     return await this.itemRepository.find({
-      where: { inventoryId },
-      relations: ['inventory'],
+      where: { product_id: productId },
+      relations: ['product', 'purchase', 'purchase_order_item'],
+    });
+  }
+
+  async findByPurchase(purchaseId: number): Promise<Item[]> {
+    return await this.itemRepository.find({
+      where: { purchase_id: purchaseId },
+      relations: ['product', 'purchase', 'purchase_order_item'],
     });
   }
 
