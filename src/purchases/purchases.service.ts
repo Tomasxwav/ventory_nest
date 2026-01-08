@@ -102,25 +102,26 @@ export class PurchasesService {
               product_id: productDto.productId,
               purchase_id: savedPurchase.id,
               purchase_order_item_id: purchaseOrderItemId,
-              serial_number: itemDto.serialNumber,
-              purchase_cost: null,
-              sale_cost: null,
-              purchase_currency: null,
-              sale_currency: null,
+              serial_number: itemDto.serialNumber || null,
+              purchase_cost: itemDto.purchaseCost,
+              sale_cost: itemDto.saleCost,
+              purchase_currency: itemDto.purchaseCurrency,
+              sale_currency: itemDto.saleCurrency,
             }),
           );
         } else {
           // Modo no serializado: crear items automáticamente sin serial number
+          // Usar los costos del producto (a nivel de lote)
           items = Array.from({ length: productDto.quantity }, () =>
             queryRunner.manager.create(Item, {
               product_id: productDto.productId,
               purchase_id: savedPurchase.id,
               purchase_order_item_id: purchaseOrderItemId,
               serial_number: null,
-              purchase_cost: null,
-              sale_cost: null,
-              purchase_currency: null,
-              sale_currency: null,
+              purchase_cost: productDto.purchaseCost,
+              sale_cost: productDto.saleCost,
+              purchase_currency: productDto.purchaseCurrency,
+              sale_currency: productDto.saleCurrency,
             }),
           );
         }

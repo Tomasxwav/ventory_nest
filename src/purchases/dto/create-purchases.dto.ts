@@ -12,14 +12,35 @@ import {
   Length,
   IsBoolean,
   ValidateIf,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateItemDto {
-  @IsNotEmpty({ message: 'El número de serie es requerido' })
+  @IsOptional()
   @IsString({ message: 'El número de serie debe ser un texto' })
   @Length(1, 255, { message: 'El número de serie debe tener entre 1 y 255 caracteres' })
-  serialNumber: string;
+  serialNumber?: string;
+
+  @IsNotEmpty({ message: 'El costo de compra es requerido' })
+  @IsNumber({}, { message: 'El costo de compra debe ser un número' })
+  @IsPositive({ message: 'El costo de compra debe ser mayor a 0' })
+  purchaseCost: number;
+
+  @IsNotEmpty({ message: 'El costo de venta es requerido' })
+  @IsNumber({}, { message: 'El costo de venta debe ser un número' })
+  @IsPositive({ message: 'El costo de venta debe ser mayor a 0' })
+  saleCost: number;
+
+  @IsNotEmpty({ message: 'La moneda de compra es requerida' })
+  @IsString({ message: 'La moneda de compra debe ser un texto' })
+  @IsIn(['mxn', 'usd', 'eur'], { message: 'La moneda de compra debe ser mxn, usd o eur' })
+  purchaseCurrency: string;
+
+  @IsNotEmpty({ message: 'La moneda de venta es requerida' })
+  @IsString({ message: 'La moneda de venta debe ser un texto' })
+  @IsIn(['mxn', 'usd', 'eur'], { message: 'La moneda de venta debe ser mxn, usd o eur' })
+  saleCurrency: string;
 }
 
 export class PurchaseProductDto {
@@ -45,6 +66,31 @@ export class PurchaseProductDto {
   @ArrayMinSize(1, { message: 'Debe haber al menos un item cuando serialized es true' })
   @Type(() => CreateItemDto)
   items?: CreateItemDto[];
+
+  // Si no es serializado, se requiere información de costos a nivel de producto
+  @ValidateIf((o) => !o.serialized)
+  @IsNotEmpty({ message: 'El costo de compra es requerido cuando no es serializado' })
+  @IsNumber({}, { message: 'El costo de compra debe ser un número' })
+  @IsPositive({ message: 'El costo de compra debe ser mayor a 0' })
+  purchaseCost?: number;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsNotEmpty({ message: 'El costo de venta es requerido cuando no es serializado' })
+  @IsNumber({}, { message: 'El costo de venta debe ser un número' })
+  @IsPositive({ message: 'El costo de venta debe ser mayor a 0' })
+  saleCost?: number;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsNotEmpty({ message: 'La moneda de compra es requerida cuando no es serializado' })
+  @IsString({ message: 'La moneda de compra debe ser un texto' })
+  @IsIn(['mxn', 'usd', 'eur'], { message: 'La moneda de compra debe ser mxn, usd o eur' })
+  purchaseCurrency?: string;
+
+  @ValidateIf((o) => !o.serialized)
+  @IsNotEmpty({ message: 'La moneda de venta es requerida cuando no es serializado' })
+  @IsString({ message: 'La moneda de venta debe ser un texto' })
+  @IsIn(['mxn', 'usd', 'eur'], { message: 'La moneda de venta debe ser mxn, usd o eur' })
+  saleCurrency?: string;
 }
 
 export class CreatePurchasesDto {
