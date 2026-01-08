@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Subcategory } from '../../subcategories/entities/subcategory.entity';
-import { Product } from '../../products/entities/product.entity';
+import { ProductCategory } from '../../products/entities/product-category.entity';
 
 @Entity('categories')
 export class Category {
@@ -30,6 +30,6 @@ export class Category {
   @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
   subcategories: Subcategory[];
 
-  @OneToMany(() => Product, (product) => product.category)
-  products: Product[];
+  @OneToMany(() => ProductCategory, (productCategory) => productCategory.category)
+  productCategories: ProductCategory[];
 }

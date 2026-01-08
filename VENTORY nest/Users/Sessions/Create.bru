@@ -1,0 +1,27 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/users/sessions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "admin@ventory.com",
+    "password": "Pass123"
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("token", res.body.access_token)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

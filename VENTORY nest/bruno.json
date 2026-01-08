@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "VENTORY nest",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

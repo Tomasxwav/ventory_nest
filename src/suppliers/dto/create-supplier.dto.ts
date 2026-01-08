@@ -7,14 +7,14 @@ export class CreateSupplierDto {
   @MinLength(2, { message: 'El nombre debe tener al menos 2 caracteres' })
   name: string;
 
-  @IsNotEmpty({ message: 'La dirección es requerida' })
-  @IsString({ message: 'La dirección debe ser un texto' })
-  @MinLength(2, { message: 'La dirección debe tener al menos 2 caracteres' })
+  @IsNotEmpty({ message: 'El email es requerido' })
+  @IsString({ message: 'El email debe ser un texto' })
+  @MinLength(2, { message: 'El email debe tener al menos 2 caracteres' })
   email: string;
 
   @IsOptional()
-  @IsString({ message: 'La dirección debe ser un texto' })
-  @MinLength(2, { message: 'La dirección debe tener al menos 2 caracteres' })
+  @IsString({ message: 'El website debe ser un texto' })
+  @MinLength(2, { message: 'El website debe tener al menos 2 caracteres' })
   website: string;
 
   @IsNotEmpty({ message: 'El teléfono es requerido' })
@@ -27,9 +27,9 @@ export class CreateSupplierDto {
   @MinLength(2, { message: 'La calle debe tener al menos 2 caracteres' })
   street: string;
 
-  @IsNotEmpty({ message: 'La calle es requerida' })
-  @IsString({ message: 'La calle debe ser un texto' })
-  @MinLength(2, { message: 'La calle debe tener al menos 2 caracteres' })
+  @IsOptional()
+  @IsString({ message: 'El número de calle debe ser un texto' })
+  @MinLength(1, { message: 'El número de calle debe tener al menos 1 caracter' })
   street_number: string;
 
   @IsOptional()
@@ -37,7 +37,7 @@ export class CreateSupplierDto {
   @MinLength(2, { message: 'El apartamento debe tener al menos 2 caracteres' })
   apartment: string;
 
-  @IsNotEmpty({ message: 'La colonia es requerida' })
+  @IsOptional()
   @IsString({ message: 'La colonia debe ser un texto' })
   @MinLength(2, { message: 'La colonia debe tener al menos 2 caracteres' })
   neighborhood: string;

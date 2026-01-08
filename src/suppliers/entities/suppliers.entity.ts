@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Purchase } from '../../purchases/entities/purchase.entity';
 
 @Entity('suppliers')
 export class Suppliers {
@@ -48,8 +50,11 @@ export class Suppliers {
   country: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updated_at: Date;
+
+  @OneToMany(() => Purchase, (purchase) => purchase.supplier)
+  purchases: Purchase[];
 }

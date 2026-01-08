@@ -88,17 +88,16 @@ export class CreateProductDto {
   @IsNumber({}, { message: 'El ID de marca debe ser un número' })
   brand_id: number;
 
-  @IsNotEmpty({ message: 'El ID de categoría es requerido' })
-  @IsNumber({}, { message: 'El ID de categoría debe ser un número' })
-  category_id: number;
-
-  @IsNotEmpty({ message: 'El ID de subcategoría es requerido' })
-  @IsNumber({}, { message: 'El ID de subcategoría debe ser un número' })
-  subcategory_id: number;
-
   @IsOptional()
   @IsString({ message: 'La imagen debe ser un texto' })
   image?: string;
+
+  // Categorías y subcategorías (muchos a muchos)
+  @IsOptional()
+  category_ids?: number[];
+
+  @IsOptional()
+  subcategory_ids?: number[];
 
   // Parámetros opcionales para crear inventario e item
   @IsOptional()

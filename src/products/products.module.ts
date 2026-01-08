@@ -4,15 +4,24 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
+import { ProductCategory } from './entities/product-category.entity';
+import { ProductSubcategory } from './entities/product-subcategory.entity';
 import { Brand } from '../brands/entities/brand.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Subcategory } from '../subcategories/entities/subcategory.entity';
-import { Inventory } from '../inventory/entities/inventory.entity';
 import { Item } from '../items/entities/item.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Brand, Category, Subcategory, Inventory, Item]),
+    TypeOrmModule.forFeature([
+      Product,
+      ProductCategory,
+      ProductSubcategory,
+      Brand,
+      Category,
+      Subcategory,
+      Item,
+    ]),
     MulterModule.register({
       dest: './uploads/products',
     }),

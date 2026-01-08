@@ -1,0 +1,33 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/purchase-requests
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "request_number": "REQ-2026-001",
+    "user_id": 1,
+    "request_date": "2026-01-02",
+    "priority": "alta",
+    "items": [
+      {
+        "productId": 5,
+        "quantity": 100,
+        "unit_of_measure": "pcs",
+        "details": "Urgent restock"
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
