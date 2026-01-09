@@ -15,7 +15,7 @@ export class BrandsController {
   }
 
   @Get()
-  findAll(): Promise<Brand[]> {
+  findAll() {
     return this.brandsService.findAll();
   }
 }

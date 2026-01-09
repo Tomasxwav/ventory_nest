@@ -19,7 +19,7 @@ export class CreateProductDto {
   @MinLength(3, { message: 'El nombre debe tener al menos 3 caracteres' })
   name: string;
 
-  @IsNotEmpty({ message: 'La descripción es requerida' })
+  @IsOptional()
   @IsString({ message: 'La descripción debe ser un texto' })
   description: string;
 
@@ -37,14 +37,17 @@ export class CreateProductDto {
   })
   status: string;
 
-  @IsNotEmpty({ message: 'La moneda es requerida' })
+  // @IsNotEmpty({ message: 'La moneda es requerida' })
+  @IsOptional()
   @IsString()
   @IsIn(['mxn', 'usd', 'eur'], {
     message: 'La moneda debe ser válida (mxn, usd, eur)',
   })
   currency: string;
 
-  @IsNotEmpty({ message: 'El SKU es requerido' })
+  
+  // @IsNotEmpty({ message: 'El SKU es requerido' })
+  @IsOptional()
   @IsString()
   serial_number: string;
 
@@ -77,7 +80,8 @@ export class CreateProductDto {
   @Min(0, { message: 'El stock debe ser mayor o igual a 0' })
   stock?: number;
 
-  @IsNotEmpty({ message: 'El SKU es requerido' })
+  // @IsNotEmpty({ message: 'El SKU es requerido' })
+  @IsOptional()
   @IsString({ message: 'El SKU debe ser un texto' })
   @Matches(/^[a-zA-Z0-9-_]+$/, {
     message: 'El SKU debe ser alfanumérico (puede incluir - y _)',

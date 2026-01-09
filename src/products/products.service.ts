@@ -35,22 +35,12 @@ export class ProductsService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Subcategory)
     private readonly subcategoryRepository: Repository<Subcategory>,
-    @InjectRepository(Item)
-    private readonly itemRepository: Repository<Item>,
   ) {}
 
   async create(
     createProductDto: CreateProductDto,
     file?: Express.Multer.File,
   ): Promise<Product> {
-    // Verificar si el SKU ya existe
-    const existingProduct = await this.productRepository.findOne({
-      where: { sku: createProductDto.sku },
-    });
-
-    if (existingProduct) {
-      throw new ConflictException('Ya existe un producto con ese SKU');
-    }
 
     // Verificar si la marca existe
     const brand = await this.brandRepository.findOne({
