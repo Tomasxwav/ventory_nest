@@ -1,0 +1,100 @@
+meta {
+  name: Cancel Sales Order
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{url}}/sales-orders/1/cancel
+  body: none
+  auth: none
+}
+
+docs {
+  # Cancelar Orden de Venta
+  
+  ## URL:
+  `PATCH /sales-orders/:id/cancel`
+  
+  ## Proceso:
+  1. Verifica que la orden existe
+  2. Valida que NO esté confirmada
+  3. Valida que NO esté ya cancelada
+  4. **LIBERA** los items reservados:
+     - **reserved** → **available**
+  5. Actualiza status de orden:
+     - **pending** → **cancelled**
+  
+  ## ⚠️ RESTRICCIÓN:
+  Solo se pueden cancelar órdenes con status:
+  - ✅ `pending`
+  
+  NO se pueden cancelar órdenes:
+  - ❌ `confirmed`
+  - ❌ `in_progress`
+  - ❌ `completed`
+  
+  ## Liberación de Items:
+  
+  ### Items Serializados:
+  El item específico vuelve a `available`
+  ```
+  Item ID 523 (Laptop ABC123)
+  reserved → available
+  ```
+  
+  ### Items NO Serializados:
+  Los N items reservados vuelven a `available`
+  ```
+  50 cables USB-C
+  reserved → available
+  ```
+  
+  ## Validaciones:
+  - ✅ Orden existe
+  - ✅ Orden NO está confirmada
+  - ✅ Orden NO está ya cancelada
+  
+  ## Errores:
+  
+  ### Orden no encontrada:
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Orden de venta con ID X no encontrada"
+  }
+  ```
+  
+  ### Orden ya cancelada:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "La orden ya está cancelada"
+  }
+  ```
+  
+  ### Orden confirmada:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "No se puede cancelar una orden confirmada"
+  }
+  ```
+  
+  ## Cuándo Usar:
+  - Cliente cancela antes de pagar
+  - No hay stock suficiente después de revisar
+  - Error en la captura de la orden
+  - Cliente no responde/no recoge
+  
+  ## Beneficio:
+  Los items quedan disponibles inmediatamente para:
+  - Otras ventas
+  - Otros clientes
+  - Nuevas órdenes
+  
+  ## Transacción:
+  Todo el proceso es transaccional:
+  - Si falla algo, se hace ROLLBACK
+  - No quedan items en estado inconsistente
+}

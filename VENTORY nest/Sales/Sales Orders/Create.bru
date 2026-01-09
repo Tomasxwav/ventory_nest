@@ -1,0 +1,101 @@
+meta {
+  name: Create Sales Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/sales-orders
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "order_number": "SO-2026-001",
+    "client_id": 1,
+    "customer_name": "Juan Pérez",
+    "customer_email": "juan@example.com",
+    "customer_phone": "1234567890",
+    "customer_address": "Av. Principal 123, Ciudad",
+    "order_date": "2026-01-09T10:00:00Z",
+    "status": "pending",
+    "notes": "Cliente preferente, entregar con urgencia",
+    "user_id": 1,
+    "items": [
+      {
+        "product_id": 1,
+        "item_id": 5,
+        "quantity": 1,
+        "unit_price": 15000,
+        "discount": 500,
+        "notes": "Laptop con serial ABC123"
+      },
+      {
+        "product_id": 2,
+        "quantity": 50,
+        "unit_price": 2.5,
+        "discount": 0,
+        "notes": "Cables USB-C"
+      }
+    ]
+  }
+}
+
+docs {
+  # Crear Orden de Venta
+  
+  ## Proceso:
+  1. Valida existencia de productos
+  2. Valida disponibilidad de items
+  3. **RESERVA** los items (status: available → reserved)
+  4. Calcula totales automáticamente:
+     - subtotal = suma de (quantity × unit_price - discount)
+     - tax = subtotal × 0.16 (16% IVA)
+     - total = subtotal + tax
+  5. Crea la orden con status "pending"
+  
+  ## Items del Array:
+  
+  ### Item Serializado (con número de serie):
+  ```json
+  {
+    "product_id": 1,
+    "item_id": 5,        // ← ID del item específico
+    "quantity": 1,       // Siempre 1 para serializados
+    "unit_price": 15000,
+    "discount": 500
+  }
+  ```
+  
+  ### Item NO Serializado (cantidad general):
+  ```json
+  {
+    "product_id": 2,
+    "item_id": null,     // ← Sin item específico
+    "quantity": 50,      // Cantidad a vender
+    "unit_price": 2.5,
+    "discount": 0
+  }
+  ```
+  
+  ## Validaciones:
+  - ✅ Producto existe
+  - ✅ Item está disponible (status: available)
+  - ✅ Stock suficiente para productos no serializados
+  - ✅ Item no está reservado ni vendido
+  
+  ## Respuesta Exitosa:
+  Retorna la orden creada con:
+  - Datos de la orden
+  - Items con relaciones (product, item)
+  - Cliente (si aplica)
+  - Usuario que creó la orden
+  - Totales calculados
+  
+  ## Transacción:
+  Si algo falla, se hace ROLLBACK completo:
+  - No se crea la orden
+  - No se reservan items
+  - Base de datos queda consistente
+}
