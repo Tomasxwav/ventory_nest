@@ -83,16 +83,11 @@ export class ProductsController {
     const createProductDto = plainToInstance(CreateProductDto, body);
     this.logger.log(`DTO transformado: ${JSON.stringify(createProductDto)}`);
     
-    // Validar manualmente
     const errors = await validate(createProductDto);
     if (errors.length > 0) {
       const messages = errors.map(error => Object.values(error.constraints || {})).flat();
       throw new BadRequestException(messages);
     }
-    
-    // Log temporal para debuggear
-    this.logger.log(`DTO transformado: ${JSON.stringify(createProductDto)}`);
-    this.logger.log(`Archivo recibido: ${file?.filename}`);
     
     return this.productsService.create(createProductDto, file);
   }

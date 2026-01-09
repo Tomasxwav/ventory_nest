@@ -21,7 +21,6 @@ export class PurchaseRequestsService {
   ) {}
 
   async create(createDto: CreatePurchaseRequestDto) {
-    // Validar que el número de solicitud no exista
     const existingRequest = await this.purchaseRequestRepository.findOne({
       where: { request_number: createDto.request_number },
     });
@@ -32,7 +31,6 @@ export class PurchaseRequestsService {
       );
     }
 
-    // Validar que el usuario exista
     const user = await this.userRepository.findOne({
       where: { id: createDto.user_id },
     });
@@ -43,7 +41,6 @@ export class PurchaseRequestsService {
       );
     }
 
-    // Validar que todos los productos existan
     const productIds = createDto.items.map((item) => item.productId);
     const products = await this.productRepository.findByIds(productIds);
 

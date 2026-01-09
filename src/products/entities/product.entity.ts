@@ -43,7 +43,7 @@ export class Product {
   @Column({ 
     type: 'varchar',
     length: 10,
-    nullable: false,
+    nullable: true,
   })
   currency: string;
 
@@ -62,7 +62,7 @@ export class Product {
   @Column({ type: 'int', nullable: true })
   stock: number;
 
-  @Column({ unique: true, length: 100 })
+  @Column({ unique: true, length: 100, nullable: true })
   sku: string;
 
   @Column({ name: 'serial_number', unique: true, length: 255, nullable: true })

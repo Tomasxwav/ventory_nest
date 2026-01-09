@@ -32,23 +32,8 @@ export class PurchaseOrderItem {
   @Column({ name: 'unit_of_measure', length: 50 })
   unit_of_measure: string;
 
-  @Column({
-    name: 'received_quantity',
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-    default: 0,
-  })
+  @Column({ name: 'received_quantity', type: 'decimal', precision: 10, scale: 2, default: 0 })
   received_quantity: number;
-
-  @Column({
-    name: 'factured_quantity',
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-    default: 0,
-  })
-  factured_quantity: number;
 
   @ManyToOne(() => Product, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })

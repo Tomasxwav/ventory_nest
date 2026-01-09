@@ -35,22 +35,12 @@ export class ProductsService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Subcategory)
     private readonly subcategoryRepository: Repository<Subcategory>,
-    @InjectRepository(Item)
-    private readonly itemRepository: Repository<Item>,
   ) {}
 
   async create(
     createProductDto: CreateProductDto,
     file?: Express.Multer.File,
   ): Promise<Product> {
-    // Verificar si el SKU ya existe
-    const existingProduct = await this.productRepository.findOne({
-      where: { sku: createProductDto.sku },
-    });
-
-    if (existingProduct) {
-      throw new ConflictException('Ya existe un producto con ese SKU');
-    }
 
     // Verificar si la marca existe
     const brand = await this.brandRepository.findOne({
@@ -110,7 +100,7 @@ export class ProductsService {
 
     const savedProduct = await this.productRepository.save(product);
 
-    // Crear relaciones N:M con categorías
+    // relacione N:M con categorías
     if (createProductDto.category_ids && createProductDto.category_ids.length > 0) {
       for (const categoryId of createProductDto.category_ids) {
         const productCategory = this.productCategoryRepository.create({
@@ -121,7 +111,7 @@ export class ProductsService {
       }
     }
 
-    // Crear relaciones N:M con subcategorías
+    // relacion N:M con subcategorías
     if (createProductDto.subcategory_ids && createProductDto.subcategory_ids.length > 0) {
       for (const subcategoryId of createProductDto.subcategory_ids) {
         const productSubcategory = this.productSubcategoryRepository.create({
@@ -217,7 +207,6 @@ export class ProductsService {
       throw new NotFoundException('Producto no encontrado');
     }
 
-    // Verificar si la marca existe (si se proporciona)
     if (updateProductDto.brand_id) {
       const brand = await this.brandRepository.findOne({
         where: { id: updateProductDto.brand_id },
@@ -227,9 +216,7 @@ export class ProductsService {
       }
     }
 
-    // Manejar la imagen si se proporcionó
     if (file) {
-      // Eliminar imagen anterior si existe
       if (product.image) {
         const oldImagePath = path.join(
           process.cwd(),
@@ -244,16 +231,13 @@ export class ProductsService {
       updateProductDto.image = file.filename;
     }
 
-    // Actualizar campos básicos del producto
     Object.assign(product, updateProductDto);
     const updatedProduct = await this.productRepository.save(product);
 
-    // Actualizar categorías si se proporcionaron
     if (updateProductDto.category_ids !== undefined) {
       await this.updateProductCategories(id, updateProductDto.category_ids);
     }
 
-    // Actualizar subcategorías si se proporcionaron
     if (updateProductDto.subcategory_ids !== undefined) {
       await this.updateProductSubcategories(id, updateProductDto.subcategory_ids);
     }
@@ -265,10 +249,8 @@ export class ProductsService {
     productId: number,
     categoryIds: number[],
   ): Promise<void> {
-    // Eliminar todas las categorías actuales
     await this.productCategoryRepository.delete({ product_id: productId });
 
-    // Agregar las nuevas categorías
     if (categoryIds && categoryIds.length > 0) {
       for (const categoryId of categoryIds) {
         const category = await this.categoryRepository.findOne({
@@ -291,10 +273,8 @@ export class ProductsService {
     productId: number,
     subcategoryIds: number[],
   ): Promise<void> {
-    // Eliminar todas las subcategorías actuales
     await this.productSubcategoryRepository.delete({ product_id: productId });
 
-    // Agregar las nuevas subcategorías
     if (subcategoryIds && subcategoryIds.length > 0) {
       for (const subcategoryId of subcategoryIds) {
         const subcategory = await this.subcategoryRepository.findOne({
@@ -330,7 +310,6 @@ export class ProductsService {
     }
 
     for (const categoryId of addCategoryDto.category_ids) {
-      // Verificar que la categoría existe
       const category = await this.categoryRepository.findOne({
         where: { id: categoryId },
       });
@@ -339,7 +318,6 @@ export class ProductsService {
         throw new NotFoundException(`La categoría con ID ${categoryId} no existe`);
       }
 
-      // Verificar si ya existe la relación
       const existingRelation = await this.productCategoryRepository.findOne({
         where: { product_id: productId, category_id: categoryId },
       });
@@ -350,7 +328,6 @@ export class ProductsService {
         );
       }
 
-      // Crear la relación
       const productCategory = this.productCategoryRepository.create({
         product_id: productId,
         category_id: categoryId,
@@ -413,7 +390,6 @@ export class ProductsService {
     }
 
     for (const subcategoryId of addSubcategoryDto.subcategory_ids) {
-      // Verificar que la subcategoría existe
       const subcategory = await this.subcategoryRepository.findOne({
         where: { id: subcategoryId },
       });
@@ -424,7 +400,6 @@ export class ProductsService {
         );
       }
 
-      // Verificar si ya existe la relación
       const existingRelation = await this.productSubcategoryRepository.findOne({
         where: { product_id: productId, subcategory_id: subcategoryId },
       });
@@ -435,7 +410,6 @@ export class ProductsService {
         );
       }
 
-      // Crear la relación
       const productSubcategory = this.productSubcategoryRepository.create({
         product_id: productId,
         subcategory_id: subcategoryId,

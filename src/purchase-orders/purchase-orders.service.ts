@@ -7,7 +7,7 @@ import { PurchaseOrderItem } from './entities/purchase-order-item.entity';
 import { Product } from '../products/entities/product.entity';
 import { Suppliers } from '../suppliers/entities/suppliers.entity';
 import { User } from '../users/entities/user.entity';
-import { PurchaseRequest } from '../purchase-requests/entities/purchase-request.entity';
+import { PurchaseRequest, PurchaseRequestStatus } from '../purchase-requests/entities/purchase-request.entity';
 
 @Injectable()
 export class PurchaseOrdersService {
@@ -27,7 +27,6 @@ export class PurchaseOrdersService {
   ) {}
 
   async create(createDto: CreatePurchaseOrderDto) {
-    // Validar que el número de orden no exista
     const existingOrder = await this.purchaseOrderRepository.findOne({
       where: { order_number: createDto.order_number },
     });
@@ -38,7 +37,6 @@ export class PurchaseOrdersService {
       );
     }
 
-    // Validar que el proveedor exista
     const supplier = await this.suppliersRepository.findOne({
       where: { id: createDto.supplier_id },
     });
@@ -49,7 +47,6 @@ export class PurchaseOrdersService {
       );
     }
 
-    // Validar que el usuario que crea la orden exista
     const user = await this.userRepository.findOne({
       where: { id: createDto.created_by_id },
     });
@@ -60,9 +57,9 @@ export class PurchaseOrdersService {
       );
     }
 
-    // Validar que la solicitud de compra exista (si se proporciona)
+    let purchaseRequest = null;
     if (createDto.purchase_request_id) {
-      const purchaseRequest = await this.purchaseRequestRepository.findOne({
+      purchaseRequest = await this.purchaseRequestRepository.findOne({
         where: { id: createDto.purchase_request_id },
       });
 
@@ -73,7 +70,6 @@ export class PurchaseOrdersService {
       }
     }
 
-    // Validar que todos los productos existan
     const productIds = createDto.items.map((item) => item.productId);
     const products = await this.productRepository.findByIds(productIds);
 
@@ -85,7 +81,6 @@ export class PurchaseOrdersService {
       );
     }
 
-    // Calculate totals if not provided
     let subtotal = createDto.subtotal || 0;
     let total = createDto.total || 0;
 
@@ -113,6 +108,11 @@ export class PurchaseOrdersService {
     });
 
     const savedOrder = await this.purchaseOrderRepository.save(purchaseOrder);
+
+    if (purchaseRequest) {
+      purchaseRequest.status = PurchaseRequestStatus.CONVERTIDA;
+      await this.purchaseRequestRepository.save(purchaseRequest);
+    }
 
     const items = createDto.items.map((item) =>
       this.purchaseOrderItemRepository.create({
