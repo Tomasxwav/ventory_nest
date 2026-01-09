@@ -1,0 +1,27 @@
+meta {
+  name: Index
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/brands?order_by_field=name&order_by_direction=desc
+  body: none
+  auth: inherit
+}
+
+params:query {
+  order_by_field: name
+  order_by_direction: desc
+  ~filter[name]: Samsung
+  ~offset: 1
+  ~limit: 1
+}
+
+headers {
+  : 
+}
+
+settings {
+  encodeUrl: true
+}

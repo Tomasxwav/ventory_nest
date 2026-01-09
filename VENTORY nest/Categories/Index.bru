@@ -1,0 +1,25 @@
+meta {
+  name: Index
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/categories
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~filter[products_count]: 1
+  ~filter[description]: Hogar
+  ~filter[name]: Hogar
+  ~order_by_field: name
+  ~order_by_direction: desc
+  ~offset: 1
+  ~limit: 1
+}
+
+settings {
+  encodeUrl: true
+}

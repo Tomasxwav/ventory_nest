@@ -7,7 +7,15 @@ export class CreateItemDto {
 
   @IsNotEmpty()
   @IsNumber()
-  inventoryId: number;
+  productId: number;
+
+  @IsOptional()
+  @IsNumber()
+  purchaseId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  purchaseOrderItemId?: number;
 
   @IsNotEmpty()
   @IsNumber()

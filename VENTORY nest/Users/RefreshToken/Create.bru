@@ -1,0 +1,27 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{url}}/users/refresh_token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdmVudG9yeS5jb20iLCJyb2xlIjoxLCJpYXQiOjE3NjYwODA2MTAsImV4cCI6MTc2NjA4MTUxMH0.f8CkeuZTB9IR4edAMVfXQODEX-qYAl23UaZykDXG8j8",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdmVudG9yeS5jb20iLCJyb2xlIjoxLCJpYXQiOjE3NjYwODA2MTAsImV4cCI6MTc2NjY4NTQxMH0.owQlgtTo4Puibm4ZR2-3xjLVcqKcwqgylYBuAkvdKZk"
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("token", res.body.data.access_token)
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Show
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/products/:product_id/image
+  body: none
+  auth: inherit
+}
+
+params:path {
+  product_id: 20
+}
+
+settings {
+  encodeUrl: true
+}

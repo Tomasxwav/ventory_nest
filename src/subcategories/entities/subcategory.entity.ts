@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
-import { Product } from '../../products/entities/product.entity';
+import { ProductSubcategory } from '../../products/entities/product-subcategory.entity';
 
 @Entity('subcategories')
 export class Subcategory {
@@ -38,6 +38,6 @@ export class Subcategory {
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @OneToMany(() => Product, (product) => product.subcategory)
-  products: Product[];
+  @OneToMany(() => ProductSubcategory, (productSubcategory) => productSubcategory.subcategory)
+  productSubcategories: ProductSubcategory[];
 }

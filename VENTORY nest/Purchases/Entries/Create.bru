@@ -1,0 +1,117 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/purchases
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "voucher": "V-2026-001",
+    "invoice": "F-2026-001",
+    "purchaseOrderId": 1,
+    "notes": "Recepción parcial de orden de compra #1. Llegaron 8 juguetes y 1 laptop",
+    "products": [
+      {
+        "productId": 1,
+        "quantity": 8,
+        "serialized": true,
+        "items": [
+          {
+            "serialNumber": "DELL-SN-2026-001",
+            "purchaseCost": 15000.00,
+            "saleCost": 18500.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-002",
+            "purchaseCost": 15000.00,
+            "saleCost": 18500.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-003",
+            "purchaseCost": 15000.00,
+            "saleCost": 18500.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-004",
+            "purchaseCost": 15000.00,
+            "saleCost": 18500.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-005",
+            "purchaseCost": 15000.00,
+            "saleCost": 18500.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-006",
+            "purchaseCost": 15200.00,
+            "saleCost": 18700.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-007",
+            "purchaseCost": 15200.00,
+            "saleCost": 18700.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          },
+          {
+            "serialNumber": "DELL-SN-2026-008",
+            "purchaseCost": 15200.00,
+            "saleCost": 18700.00,
+            "purchaseCurrency": "mxn",
+            "saleCurrency": "mxn"
+          }
+        ]
+      },
+      {
+        "productId": 2,
+        "quantity": 1,
+        "serialized": false,
+        "purchaseCost": 45.50,
+        "saleCost": 75.00,
+        "purchaseCurrency": "mxn",
+        "saleCurrency": "mxn"
+      }
+    ]
+  }
+  
+  //
+  // {
+  //   "voucher": "V-2024-002",
+  //   "invoice": "F-2024-002",
+  //   "notes": "Compra de cables",
+  //   "products": [
+  //     {
+  //       "productId": 2,
+  //       "quantity": 100,
+  //       "serialized": false,
+  //       "purchaseCost": 50,
+  //       "saleCost": 80,
+  //       "purchaseCurrency": "mxn",
+  //       "saleCurrency": "mxn"
+  //     }
+  //   ]
+  // }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

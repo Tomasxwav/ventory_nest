@@ -7,7 +7,9 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Inventory } from '../../inventory/entities/inventory.entity';
+import { Product } from '../../products/entities/product.entity';
+import { Purchase } from '../../purchases/entities/purchase.entity';
+import { PurchaseOrderItem } from '../../purchase-orders/entities/purchase-order-item.entity';
 
 @Entity('items')
 export class Item {
@@ -15,10 +17,16 @@ export class Item {
   id: number;
 
   @Column({ name: 'serial_number', length: 255, nullable: true })
-  serialNumber: string;
+  serial_number: string;
 
-  @Column({ name: 'inventory_id' })
-  inventoryId: number;
+  @Column({ name: 'product_id', type: 'int' })
+  product_id: number;
+
+  @Column({ name: 'purchase_id', type: 'int', nullable: true })
+  purchase_id: number;
+
+  @Column({ name: 'purchase_order_item_id', type: 'int', nullable: true })
+  purchase_order_item_id: number;
 
   @Column({
     name: 'purchase_cost',
@@ -27,7 +35,7 @@ export class Item {
     scale: 4,
     nullable: false,
   })
-  purchaseCost: number;
+  purchase_cost: number;
 
   @Column({
     name: 'sale_cost',
@@ -36,7 +44,7 @@ export class Item {
     scale: 4,
     nullable: false,
   })
-  saleCost: number;
+  sale_cost: number;
 
   @Column({
     name: 'purchase_currency',
@@ -45,7 +53,7 @@ export class Item {
     default: 'mxn',
     nullable: false,
   })
-  purchaseCurrency: string;
+  purchase_currency: string;
 
   @Column({
     name: 'sale_currency',
@@ -54,15 +62,23 @@ export class Item {
     default: 'mxn',
     nullable: false,
   })
-  saleCurrency: string;
+  sale_currency: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updated_at: Date;
 
-  @ManyToOne(() => Inventory, (inventory) => inventory.items)
-  @JoinColumn({ name: 'inventory_id' })
-  inventory: Inventory;
+  @ManyToOne(() => Product, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'product_id' })
+  product: Product;
+
+  @ManyToOne(() => Purchase, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'purchase_id' })
+  purchase: Purchase;
+
+  @ManyToOne(() => PurchaseOrderItem, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'purchase_order_item_id' })
+  purchase_order_item: PurchaseOrderItem;
 }
