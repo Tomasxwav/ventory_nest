@@ -32,7 +32,6 @@ export class PurchasesService {
   ) {}
 
   async create(createPurchasesDto: CreatePurchasesDto) {
-    // Validaciones ANTES de iniciar la transacción
     const productIds = createPurchasesDto.products.map((p) => p.productId);
     const products = await this.productRepository.findByIds(productIds);
 
@@ -44,7 +43,6 @@ export class PurchasesService {
       );
     }
 
-    // Validar según el modo (serialized o no)
     for (const productDto of createPurchasesDto.products) {
       if (productDto.serialized) {
         // Modo serializado: validar que la cantidad de items coincida
@@ -59,7 +57,6 @@ export class PurchasesService {
       }
     }
 
-    // Iniciar transacción después de las validaciones
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -74,11 +71,9 @@ export class PurchasesService {
 
       const savedPurchase = await queryRunner.manager.save(Purchase, purchase);
 
-      // Crear los items directamente sin inventario intermedio
       const allItems = [];
 
       for (const productDto of createPurchasesDto.products) {
-        // Buscar el purchase_order_item correspondiente si existe purchase_order_id
         let purchaseOrderItemId = null;
         if (createPurchasesDto.purchaseOrderId) {
           const purchaseOrderItem = await queryRunner.manager.findOne(
@@ -130,7 +125,6 @@ export class PurchasesService {
         allItems.push(...items);
       }
 
-      // Actualizar el estado de la orden de compra si existe
       if (createPurchasesDto.purchaseOrderId) {
         await this.updatePurchaseOrderStatus(
           queryRunner,
@@ -139,10 +133,8 @@ export class PurchasesService {
         );
       }
 
-      // Commit de la transacción
       await queryRunner.commitTransaction();
 
-      // Retornar la compra completa con sus relaciones
       return await this.purchaseRepository.findOne({
         where: { id: savedPurchase.id },
         relations: [
@@ -154,13 +146,11 @@ export class PurchasesService {
         ],
       });
     } catch (error) {
-      // Rollback en caso de error
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
       throw error;
     } finally {
-      // Liberar el queryRunner
       await queryRunner.release();
     }
   }
@@ -206,7 +196,6 @@ export class PurchasesService {
   }
 
   /**
-   * Actualiza el estado de una orden de compra basándose en las cantidades recibidas
    * - Si la cantidad recibida es 0: estado = CANCELADA
    * - Si la cantidad recibida es menor que la ordenada: estado = PARCIAL
    * - Si la cantidad recibida es igual a la ordenada: estado = COMPLETA
@@ -216,7 +205,6 @@ export class PurchasesService {
     purchaseOrderId: number,
     purchasedProducts: Array<{ productId: number; quantity: number }>,
   ) {
-    // Obtener la orden de compra con sus items
     const purchaseOrder = await queryRunner.manager.findOne(PurchaseOrder, {
       where: { id: purchaseOrderId },
       relations: ['items'],
@@ -228,33 +216,30 @@ export class PurchasesService {
       );
     }
 
-    // Actualizar las cantidades recibidas de cada item
     for (const purchasedProduct of purchasedProducts) {
       const orderItem = purchaseOrder.items.find(
         (item) => item.product_id === purchasedProduct.productId,
       );
 
       if (orderItem) {
-        // Incrementar la cantidad recibida
         orderItem.received_quantity = Number(orderItem.received_quantity) + purchasedProduct.quantity;
         await queryRunner.manager.save(PurchaseOrderItem, orderItem);
       }
     }
 
-    // Determinar el nuevo estado de la orden de compra
     let newStatus: PurchaseOrderStatus;
 
-    // Verificar si todas las cantidades son 0 (cancelado)
+    //si todas las cantidades son 0 (cancelado)
     const allZero = purchaseOrder.items.every(
       (item) => Number(item.received_quantity) === 0,
     );
 
-    // Verificar si todas las cantidades están completas
+    //si todas las cantidades están completas
     const allComplete = purchaseOrder.items.every(
       (item) => Number(item.received_quantity) >= Number(item.quantity),
     );
 
-    // Verificar si hay cantidades parciales
+    // si hay cantidades parciales
     const hasPartial = purchaseOrder.items.some(
       (item) =>
         Number(item.received_quantity) > 0 &&
@@ -271,7 +256,6 @@ export class PurchasesService {
       newStatus = PurchaseOrderStatus.PENDIENTE;
     }
 
-    // Actualizar el estado de la orden de compra
     purchaseOrder.status = newStatus;
     await queryRunner.manager.save(PurchaseOrder, purchaseOrder);
   }

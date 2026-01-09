@@ -55,7 +55,7 @@ export class CreateProductDto {
   @Transform(({ value }) => {
     if (value === 'true' || value === true) return true;
     if (value === 'false' || value === false) return false;
-    return value; // deja pasar otros valores para que falle IsBoolean()
+    return value;
   })
   @IsBoolean()
   allow_low_stock_limit: boolean;
@@ -103,7 +103,6 @@ export class CreateProductDto {
   @IsOptional()
   subcategory_ids?: number[];
 
-  // Parámetros opcionales para crear inventario e item
   @IsOptional()
   @IsNumber({}, { message: 'El costo de compra debe ser un número' })
   @Min(0, { message: 'El costo de compra debe ser mayor o igual a 0' })
