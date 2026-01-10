@@ -36,6 +36,8 @@ import { SalesOrderItem } from './sales-orders/entities/sales-order-item.entity'
 import { Client } from './clients/entities/client.entity';
 import { Delivery } from './deliveries/entities/delivery.entity';
 import { DeliveryItem } from './deliveries/entities/delivery-item.entity';
+import { Invoice } from './invoices/entities/invoice.entity';
+import { InvoiceItem } from './invoices/entities/invoice-item.entity';
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { DeliveryItem } from './deliveries/entities/delivery-item.entity';
         Client,
         Delivery,
         DeliveryItem,
+        Invoice,
+        InvoiceItem,
       ],
       synchronize: true,
     }),
