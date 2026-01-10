@@ -15,6 +15,7 @@ import { PurchasesModule } from './purchases/purchases.module';
 import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
 import { PurchaseOrdersModule } from './purchase-orders/purchase-orders.module';
 import { SalesOrdersModule } from './sales-orders/sales-orders.module';
+import { DeliveriesModule } from './deliveries/deliveries.module';
 import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
@@ -33,6 +34,8 @@ import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-ite
 import { SalesOrder } from './sales-orders/entities/sales-order.entity';
 import { SalesOrderItem } from './sales-orders/entities/sales-order-item.entity';
 import { Client } from './clients/entities/client.entity';
+import { Delivery } from './deliveries/entities/delivery.entity';
+import { DeliveryItem } from './deliveries/entities/delivery-item.entity';
 
 @Module({
   imports: [
@@ -62,6 +65,8 @@ import { Client } from './clients/entities/client.entity';
         SalesOrder,
         SalesOrderItem,
         Client,
+        Delivery,
+        DeliveryItem,
       ],
       synchronize: true,
     }),
@@ -78,6 +83,7 @@ import { Client } from './clients/entities/client.entity';
     PurchaseRequestsModule,
     PurchaseOrdersModule,
     SalesOrdersModule,
+    DeliveriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

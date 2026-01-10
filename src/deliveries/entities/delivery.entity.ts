@@ -21,7 +21,7 @@ export class Delivery {
   @Column({ name: 'delivery_number', length: 50, unique: true })
   delivery_number: string;
 
-  @Column({ name: 'sales_order_id', type: 'int' })
+  @Column({ name: 'sales_order_id', type: 'int', nullable: true })
   sales_order_id: number;
 
   @Column({ name: 'delivery_date', type: 'timestamp' })
@@ -64,6 +64,7 @@ export class Delivery {
   // Relations
   @ManyToOne(() => SalesOrder, (salesOrder) => salesOrder.deliveries, {
     onDelete: 'CASCADE',
+    nullable: true,
   })
   @JoinColumn({ name: 'sales_order_id' })
   sales_order: SalesOrder;

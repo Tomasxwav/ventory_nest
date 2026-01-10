@@ -1,0 +1,131 @@
+meta {
+  name: Create Delivery (Direct Sale)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/deliveries
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "delivery_number": "DEL-2026-002",
+    "delivery_date": "2026-01-10T14:00:00Z",
+    "status": "pending",
+    "delivery_address": "Cliente Walk-in",
+    "notes": "Venta directa en mostrador",
+    "user_id": 1,
+    "items": [
+      {
+        "product_id": 3,
+        "item_id": 15,
+        "quantity_delivered": 1,
+        "unit_price": 8000,
+        "notes": "Monitor serial XYZ789"
+      },
+      {
+        "product_id": 4,
+        "quantity_delivered": 20,
+        "unit_price": 5.5,
+        "notes": "Mouse pads"
+      }
+    ]
+  }
+}
+
+docs {
+  # Crear Entrega DIRECTA (Sin Orden de Venta)
+  
+  ## Concepto:
+  Similar a crear **purchase sin purchase order**:
+  - Venta directa del inventario
+  - No requiere orden previa
+  - Items pasan de `available` → `sold` DIRECTAMENTE
+  
+  ## Cuándo Usar:
+  - Ventas en mostrador
+  - Clientes walk-in
+  - Ventas urgentes sin proceso de orden
+  - Salidas de inventario directas
+  
+  ## Proceso:
+  1. Valida existencia de productos
+  2. Valida disponibilidad de items (`status: available`)
+  3. **Marca items como SOLD DIRECTAMENTE**:
+     - `available` → `sold`
+  4. Crea la entrega
+  5. NO hay orden asociada (`sales_order_id: null`)
+  
+  ## Diferencia Clave:
+  ```
+  CON Orden:
+  available → reserved (orden) → sold (entrega)
+  
+  SIN Orden:
+  available → sold (entrega directa) ⚡
+  ```
+  
+  ## Items del Array:
+  
+  ### Item Serializado (venta directa):
+  ```json
+  {
+    "product_id": 3,
+    "item_id": 15,              // ← Item específico disponible
+    "quantity_delivered": 1,
+    "unit_price": 8000
+  }
+  ```
+  - NO se especifica `sales_order_item_id`
+  - Item debe estar `available` o `reserved`
+  
+  ### Item NO Serializado (venta directa):
+  ```json
+  {
+    "product_id": 4,
+    "quantity_delivered": 20,   // ← Cantidad del inventario
+    "unit_price": 5.5
+  }
+  ```
+  - NO se especifica `item_id`
+  - Toma N items disponibles del producto
+  
+  ## Validaciones:
+  - ✅ Producto existe
+  - ✅ Items están disponibles (`status: available`)
+  - ✅ Stock suficiente para no serializados
+  - ✅ Item no está ya vendido
+  
+  ## Errores Comunes:
+  
+  ### Stock insuficiente:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "Stock insuficiente para producto X. Disponible: 10, Solicitado: 20"
+  }
+  ```
+  
+  ### Item no disponible:
+  ```json
+  {
+    "statusCode": 409,
+    "message": "Item XYZ no está disponible (estado: sold)"
+  }
+  ```
+  
+  ## Ventajas:
+  - ⚡ Más rápido (sin crear orden)
+  - 💰 Ideal para ventas en efectivo
+  - 📦 Salida inmediata de inventario
+  - 🎯 Proceso simplificado
+  
+  ## Resultado:
+  - Items pasan de `available` → `sold`
+  - Se crea la entrega
+  - NO hay orden asociada
+  - Items salen del inventario inmediatamente
+}

@@ -3,10 +3,15 @@ import { Type } from 'class-transformer';
 
 export class CreateDeliveryItemDto {
   @IsNumber()
-  sales_order_item_id: number;
+  @IsOptional()
+  sales_order_item_id?: number;
 
   @IsNumber()
   product_id: number;
+
+  @IsNumber()
+  @IsOptional()
+  item_id?: number;
 
   @IsNumber()
   @Min(1)
@@ -26,7 +31,8 @@ export class CreateDeliveryDto {
   delivery_number: string;
 
   @IsNumber()
-  sales_order_id: number;
+  @IsOptional()
+  sales_order_id?: number;
 
   @IsDateString()
   delivery_date: string;

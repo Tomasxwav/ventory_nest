@@ -1,0 +1,113 @@
+meta {
+  name: Create Delivery (With Sales Order)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/deliveries
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "delivery_number": "DEL-2026-001",
+    "sales_order_id": 1,
+    "delivery_date": "2026-01-10T14:00:00Z",
+    "status": "pending",
+    "delivery_address": "Av. Principal 123, Ciudad",
+    "tracking_number": "TRACK123456",
+    "carrier": "FedEx",
+    "estimated_delivery_date": "2026-01-12T18:00:00Z",
+    "notes": "Entregar en horario de oficina",
+    "user_id": 1,
+    "items": [
+      {
+        "sales_order_item_id": 1,
+        "product_id": 1,
+        "item_id": 5,
+        "quantity_delivered": 1,
+        "unit_price": 15000,
+        "notes": "Laptop serial ABC123"
+      },
+      {
+        "sales_order_item_id": 2,
+        "product_id": 2,
+        "quantity_delivered": 50,
+        "unit_price": 2.5,
+        "notes": "Cables USB-C"
+      }
+    ]
+  }
+}
+
+docs {
+  # Crear Entrega BASADA en Orden de Venta
+  
+  ## Prerrequisitos:
+  1. Orden de venta debe existir
+  2. Orden debe estar **confirmada** (`status: confirmed`)
+  3. Items deben estar **reservados** (`status: reserved`)
+  
+  ## Proceso:
+  1. Valida que la orden existe y está confirmada
+  2. Valida que los items pertenecen a la orden
+  3. **Marca items como SOLD**:
+     - `reserved` → `sold`
+  4. Crea la entrega con sus items
+  5. Actualiza orden a `in_progress`
+  
+  ## Items del Array:
+  
+  ### Item Serializado (de la orden):
+  ```json
+  {
+    "sales_order_item_id": 1,  // ← Item de la orden
+    "product_id": 1,
+    "item_id": 5,               // ← Item específico
+    "quantity_delivered": 1,
+    "unit_price": 15000
+  }
+  ```
+  
+  ### Item NO Serializado (de la orden):
+  ```json
+  {
+    "sales_order_item_id": 2,
+    "product_id": 2,
+    "quantity_delivered": 50,   // ← Cantidad a entregar
+    "unit_price": 2.5
+  }
+  ```
+  
+  ## Validaciones:
+  - ✅ Orden existe y está confirmada
+  - ✅ Sales order item pertenece a la orden
+  - ✅ Items están reservados
+  - ✅ Cantidad suficiente para no serializados
+  
+  ## Errores Comunes:
+  
+  ### Orden no confirmada:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "La orden de venta debe estar confirmada para crear una entrega. Estado actual: pending"
+  }
+  ```
+  
+  ### Item no encontrado:
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Item de orden con ID X no encontrado en la orden"
+  }
+  ```
+  
+  ## Resultado:
+  - Items pasan de `reserved` → `sold`
+  - Se crea la entrega
+  - Orden cambia a `in_progress`
+  - Items YA NO están en inventario disponible
+}
