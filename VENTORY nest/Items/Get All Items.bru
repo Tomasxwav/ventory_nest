@@ -1,0 +1,133 @@
+meta {
+  name: Get All Items
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/items?page=1&limit=10&filter[status]=available&filter[serial_number]=ABC&filter[product_id]=1&filter[product_name]=galaxy
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  limit: 10
+  filter[status]: available
+  filter[serial_number]: ABC
+  filter[product_id]: 1
+  filter[product_name]: galaxy
+}
+
+docs {
+  # Obtener Todos los Items
+  
+  ## URL:
+  `GET /items`
+  
+  ## Parámetros de Query (todos opcionales):
+  
+  ### Paginación:
+  - `page` (número): Número de página (por defecto: 1)
+  - `limit` (número): Cantidad de items por página (por defecto: 10)
+  
+  ### Filtros:
+  - `filter[product_name]` (string): Busca items por nombre de producto (búsqueda parcial)
+  - `filter[status]` (string): Filtra por estado del item
+    - Valores válidos: `available`, `reserved`, `sold`
+  - `filter[product_id]` (número): Filtra items de un producto específico
+  - `filter[serial_number]` (string): Busca por número de serie (búsqueda parcial)
+  
+  ## Ejemplos de Uso:
+  
+  ### Listar todos los items (paginado):
+  ```
+  GET /items?page=1&limit=10
+  ```
+  
+  ### Buscar items por nombre de producto:
+  ```
+  GET /items?filter[product_name]=laptop
+  ```
+  
+  ### Filtrar items disponibles:
+  ```
+  GET /items?filter[status]=available
+  ```
+  
+  ### Buscar items de un producto específico:
+  ```
+  GET /items?filter[product_id]=5
+  ```
+  
+  ### Buscar por número de serie:
+  ```
+  GET /items?filter[serial_number]=ABC123
+  ```
+  
+  ### Combinar filtros:
+  ```
+  GET /items?filter[product_name]=laptop&filter[status]=available&page=1&limit=20
+  ```
+  
+  ## Casos de Uso:
+  - 📦 Inventario: Ver todos los items disponibles en stock
+  - 🔍 Búsqueda: Encontrar items específicos por producto o número de serie
+  - 📊 Reportes: Filtrar items por estado para análisis
+  - 🛒 Ventas: Buscar items disponibles de un producto para crear orden de venta
+  - 📈 Control: Monitorear items reservados o vendidos
+  
+  ## Respuesta Exitosa:
+  ```json
+  {
+    "items": [
+      {
+        "id": 1,
+        "serial_number": "ABC123456",
+        "product_id": 5,
+        "purchase_id": 10,
+        "purchase_order_item_id": 3,
+        "purchase_cost": "100.0000",
+        "sale_cost": "150.0000",
+        "purchase_currency": "mxn",
+        "sale_currency": "mxn",
+        "status": "available",
+        "created_at": "2026-01-10T12:00:00.000Z",
+        "updated_at": "2026-01-10T12:00:00.000Z",
+        "product": {
+          "id": 5,
+          "name": "Laptop HP",
+          "sku": "LAP-HP-001",
+          "brand_id": 2
+        },
+        "purchase": {
+          "id": 10,
+          "invoice_number": "INV-2026-001"
+        },
+        "purchase_order_item": {
+          "id": 3,
+          "quantity": 1
+        }
+      }
+    ],
+    "total": 45,
+    "page": 1,
+    "limit": 10
+  }
+  ```
+  
+  ## Respuesta con Filtros:
+  La respuesta tiene el mismo formato pero solo incluye items que coincidan con los filtros aplicados.
+  
+  ## Campos de la Respuesta:
+  - `items`: Array de items encontrados
+  - `total`: Total de items que coinciden con los filtros (sin paginación)
+  - `page`: Página actual
+  - `limit`: Cantidad de items por página
+  
+  ## Notas:
+  - ✅ Todos los filtros son opcionales y se pueden combinar
+  - ✅ Las búsquedas de texto (product_name, serial_number) no son sensibles a mayúsculas
+  - ✅ Las búsquedas de texto son parciales (buscan coincidencias en cualquier parte)
+  - ✅ Si no se especifica paginación, usa valores por defecto (page=1, limit=10)
+}

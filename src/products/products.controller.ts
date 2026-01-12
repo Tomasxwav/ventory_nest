@@ -96,10 +96,11 @@ export class ProductsController {
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('filter[name]') filterName?: string,
   ): Promise<any[]> {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
-    return this.productsService.findAll(pageNum, limitNum);
+    return this.productsService.findAll(pageNum, limitNum, filterName);
   }
 
   @Get(':id/image')
