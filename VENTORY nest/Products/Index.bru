@@ -11,13 +11,13 @@ get {
 }
 
 params:query {
+  ~filter[name]: Galaxy
   ~filter[with_image]: false
   ~filter[inventory_quantity]: 1
   ~filter[brand_name]: Huawei
   ~filter[id]: 14
   ~filter[sku]: AVCSDFSDC
   ~filter[status]: active
-  ~filter[name]: Tablet
   ~order_by_field: name
   ~order_by_direction: desc
   ~offset: 1
