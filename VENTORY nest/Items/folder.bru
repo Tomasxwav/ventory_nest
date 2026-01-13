@@ -1,0 +1,34 @@
+meta {
+  name: Items
+  seq: 10
+}
+
+docs {
+  # Items - Gestión de Inventario Individual
+  
+  ## 📦 Concepto de Items
+  
+  Los **Items** son las unidades individuales de inventario que representan:
+  - Productos físicos en stock
+  - Cada item puede tener o no número de serie
+  - Rastrean costos de compra y venta
+  - Tienen estados: available, reserved, sold
+  
+  ## 🏷️ Items Serializados vs NO Serializados
+  
+  ### Serializados:
+  - Tienen `serial_number` único
+  - Ejemplos: laptops, celulares, equipos
+  - Trazabilidad individual completa
+  
+  ### NO Serializados:
+  - `serial_number` es null
+  - Ejemplos: tornillos, cables, consumibles
+  - Se manejan por cantidad
+  
+  ## 🔄 Estados de Items
+  
+  - **available**: Disponible para venta
+  - **reserved**: Reservado en orden de venta
+  - **sold**: Ya vendido/entregado
+}

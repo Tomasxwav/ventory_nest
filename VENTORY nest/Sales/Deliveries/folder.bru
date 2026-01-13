@@ -1,0 +1,40 @@
+meta {
+  name: Deliveries
+  type: folder
+}
+
+docs {
+  # Deliveries - Entregas / Salidas de Inventario
+  
+  ## 🚚 Dos Modos de Operación
+  
+  ### 1. Entrega CON Orden de Venta
+  - Requiere orden confirmada (`status: confirmed`)
+  - Valida items reservados de la orden
+  - Marca items como **sold** al crear la entrega
+  - Actualiza orden a `in_progress`
+  
+  ### 2. Entrega DIRECTA (sin orden)
+  - Venta directa del inventario
+  - Similar a crear purchase sin purchase order
+  - Valida disponibilidad (`available`)
+  - Marca items como **sold** DIRECTAMENTE
+  
+  ## 🔄 Estados de Items
+  
+  ### Con Orden de Venta:
+  ```
+  available → reserved (al crear orden)
+           → sold (al crear entrega)
+  ```
+  
+  ### Entrega Directa:
+  ```
+  available → sold (al crear entrega)
+  ```
+  
+  ## 📦 Items Serializados vs NO Serializados
+  
+  **Serializados**: Especificar `item_id`
+  **NO Serializados**: Especificar `quantity_delivered`
+}

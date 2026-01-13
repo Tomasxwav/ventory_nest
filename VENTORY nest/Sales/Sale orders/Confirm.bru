@@ -1,0 +1,73 @@
+meta {
+  name: Confirm Sales Order
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{url}}/sales-orders/1/confirm
+  body: none
+  auth: none
+}
+
+docs {
+  # Confirmar Orden de Venta
+  
+  ## URL:
+  `PATCH /sales-orders/:id/confirm`
+  
+  ## Proceso:
+  1. Verifica que la orden existe
+  2. Valida que NO esté ya confirmada
+  3. Cambia status de items:
+     - **reserved** → **sold**
+  4. Actualiza status de orden:
+     - **pending** → **confirmed**
+  
+  ## ⚠️ IMPORTANTE:
+  Una vez confirmada:
+  - ❌ NO se puede cancelar
+  - ✅ Items quedan marcados como vendidos
+  - ✅ Ya no están disponibles en inventario
+  
+  ## Estados de Items:
+  
+  ### Items Serializados:
+  El item específico pasa de `reserved` a `sold`
+  
+  ### Items NO Serializados:
+  Los N items reservados pasan de `reserved` a `sold`
+  
+  ## Validaciones:
+  - ✅ Orden existe
+  - ✅ Orden NO está ya confirmada
+  - ✅ Items están en status "reserved"
+  
+  ## Errores:
+  
+  ### Orden no encontrada:
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Orden de venta con ID X no encontrada"
+  }
+  ```
+  
+  ### Orden ya confirmada:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "La orden ya está confirmada"
+  }
+  ```
+  
+  ## Cuándo Usar:
+  - Después de recibir el pago
+  - Antes de generar la entrega
+  - Cuando se confirma la disponibilidad final
+  
+  ## Transacción:
+  Todo el proceso es transaccional:
+  - Si falla algo, se hace ROLLBACK
+  - Garantiza consistencia de datos
+}

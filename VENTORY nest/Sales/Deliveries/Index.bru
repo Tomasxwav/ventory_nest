@@ -1,0 +1,62 @@
+meta {
+  name: Get All Deliveries
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/deliveries
+  body: none
+  auth: none
+}
+
+docs {
+  # Obtener Todas las Entregas
+  
+  ## Respuesta:
+  Retorna un array con todas las entregas ordenadas por fecha (más recientes primero).
+  
+  Cada entrega incluye:
+  - Datos principales de la entrega
+  - **sales_order**: Orden de venta (si existe, null para ventas directas)
+  - **user**: Usuario que creó la entrega
+  - **items**: Array de items entregados con:
+    - Datos del item de entrega
+    - **product**: Información del producto
+    - **item**: Item específico de inventario (si es serializado)
+    - **sales_order_item**: Item de la orden (si viene de orden)
+  
+  ## Estados de Entrega:
+  - `pending`: Entrega creada, pendiente de envío
+  - `in_transit`: En tránsito
+  - `delivered`: Entregada al cliente
+  - `cancelled`: Cancelada
+  
+  ## Tipos de Entregas:
+  
+  ### Con Orden:
+  ```json
+  {
+    "id": 1,
+    "delivery_number": "DEL-2026-001",
+    "sales_order_id": 5,
+    "sales_order": { ... }
+  }
+  ```
+  
+  ### Sin Orden (Directa):
+  ```json
+  {
+    "id": 2,
+    "delivery_number": "DEL-2026-002",
+    "sales_order_id": null,
+    "sales_order": null
+  }
+  ```
+  
+  ## Ejemplo de Uso:
+  - Ver todas las entregas del día
+  - Filtrar entregas pendientes
+  - Verificar entregas completadas
+  - Revisar historial de salidas de inventario
+}

@@ -1,0 +1,46 @@
+meta {
+  name: Get Sales Order by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{url}}/sales-orders/1
+  body: none
+  auth: none
+}
+
+docs {
+  # Obtener Orden de Venta por ID
+  
+  ## URL:
+  `GET /sales-orders/:id`
+  
+  Donde `:id` es el ID numérico de la orden.
+  
+  ## Respuesta:
+  Retorna una orden específica con todas sus relaciones:
+  - Información completa de la orden
+  - Cliente asociado (si existe)
+  - Usuario que creó la orden
+  - Items detallados con:
+    - Producto completo
+    - Item de inventario específico (si es serializado)
+    - Serial number (si aplica)
+  - Entregas asociadas
+  
+  ## Error 404:
+  Si la orden no existe, retorna:
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Orden de venta con ID X no encontrada"
+  }
+  ```
+  
+  ## Ejemplo de Uso:
+  - Ver detalles de una orden específica
+  - Verificar items reservados/vendidos
+  - Rastrear números de serie vendidos
+  - Preparar información para entrega
+}

@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{url}}/brands?order_by_field=name&order_by_direction=desc
+  url: {{url}}/brands?order_by_field=name&order_by_direction=desc&filter[name]=Samsung
   body: none
   auth: inherit
 }
@@ -13,7 +13,7 @@ get {
 params:query {
   order_by_field: name
   order_by_direction: desc
-  ~filter[name]: Samsung
+  filter[name]: Samsung
   ~offset: 1
   ~limit: 1
 }
@@ -24,4 +24,5 @@ headers {
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

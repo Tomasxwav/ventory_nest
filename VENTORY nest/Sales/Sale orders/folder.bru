@@ -1,0 +1,36 @@
+meta {
+  name: Sale orders
+  seq: 3
+}
+
+auth {
+  mode: inherit
+}
+
+docs {
+  # Sales Orders - Órdenes de Venta
+  
+  ## 📋 Sistema de Gestión de Inventario
+  
+  ### Estados de Items:
+  - **available**: Item disponible para venta
+  - **reserved**: Item reservado en orden pendiente
+  - **sold**: Item vendido y confirmado
+  
+  ### Flujo de Trabajo:
+  1. **Crear Orden** → Items se RESERVAN (status: reserved)
+  2. **Confirmar Orden** → Items pasan a VENDIDOS (status: sold)
+  3. **Cancelar Orden** → Items se LIBERAN (status: available)
+  
+  ### Items Serializados vs NO Serializados:
+  
+  **Serializados** (con serial_number):
+  - Especificar `item_id` del item específico
+  - `quantity` siempre es 1
+  - Ej: Laptops, celulares, equipos
+  
+  **NO Serializados**:
+  - `item_id` es null
+  - Especificar `quantity` deseada
+  - Ej: Tornillos, cables, consumibles
+}
