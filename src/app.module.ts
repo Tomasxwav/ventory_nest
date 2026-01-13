@@ -14,6 +14,8 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
 import { PurchaseOrdersModule } from './purchase-orders/purchase-orders.module';
+import { SalesOrdersModule } from './sales-orders/sales-orders.module';
+import { DeliveriesModule } from './deliveries/deliveries.module';
 import { Brand } from './brands/entities/brand.entity';
 import { Category } from './categories/entities/category.entity';
 import { Subcategory } from './subcategories/entities/subcategory.entity';
@@ -29,6 +31,13 @@ import { PurchaseRequest } from './purchase-requests/entities/purchase-request.e
 import { PurchaseRequestItem } from './purchase-requests/entities/purchase-request-item.entity';
 import { PurchaseOrder } from './purchase-orders/entities/purchase-order.entity';
 import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-item.entity';
+import { SalesOrder } from './sales-orders/entities/sales-order.entity';
+import { SalesOrderItem } from './sales-orders/entities/sales-order-item.entity';
+import { Client } from './clients/entities/client.entity';
+import { Delivery } from './deliveries/entities/delivery.entity';
+import { DeliveryItem } from './deliveries/entities/delivery-item.entity';
+import { Invoice } from './invoices/entities/invoice.entity';
+import { InvoiceItem } from './invoices/entities/invoice-item.entity';
 
 @Module({
   imports: [
@@ -55,6 +64,13 @@ import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-ite
         PurchaseRequestItem,
         PurchaseOrder,
         PurchaseOrderItem,
+        SalesOrder,
+        SalesOrderItem,
+        Client,
+        Delivery,
+        DeliveryItem,
+        Invoice,
+        InvoiceItem,
       ],
       synchronize: true,
     }),
@@ -70,6 +86,8 @@ import { PurchaseOrderItem } from './purchase-orders/entities/purchase-order-ite
     PurchasesModule,
     PurchaseRequestsModule,
     PurchaseOrdersModule,
+    SalesOrdersModule,
+    DeliveriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

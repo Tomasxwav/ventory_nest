@@ -125,11 +125,11 @@ export class ProductsService {
     return savedProduct;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<any[]> {
-    const products = await this.productRepository
+  async findAll(page: number = 1, limit: number = 10, filterName?: string): Promise<any[]> {
+    const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.brand', 'brand')
-      .leftJoin('product.items', 'item')
+      .leftJoin('product.items', 'item', "item.status = 'available'")
       .select([
         'product.id as id',
         'product.name as name',
@@ -141,7 +141,16 @@ export class ProductsService {
         'brand.name as brand_name',
         'CASE WHEN product.image IS NOT NULL AND product.image != \'\' THEN true ELSE false END as image',
         'COALESCE(COUNT(DISTINCT item.id), 0) as product_count',
-      ])
+      ]);
+
+    // Aplicar filtro por nombre si se proporciona
+    if (filterName) {
+      queryBuilder.where('LOWER(product.name) LIKE LOWER(:name)', { 
+        name: `%${filterName}%` 
+      });
+    }
+
+    const products = await queryBuilder
       .groupBy('product.id')
       .addGroupBy('brand.name')
       .addGroupBy('product.created_at')

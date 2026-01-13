@@ -1,0 +1,94 @@
+meta {
+  name: Get Delivery by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{url}}/deliveries/1
+  body: none
+  auth: none
+}
+
+docs {
+  # Obtener Entrega por ID
+  
+  ## URL:
+  `GET /deliveries/:id`
+  
+  Donde `:id` es el ID numérico de la entrega.
+  
+  ## Respuesta:
+  Retorna una entrega específica con todas sus relaciones:
+  - Información completa de la entrega
+  - Orden de venta asociada (si existe)
+  - Usuario que creó la entrega
+  - Items entregados detallados con:
+    - Producto completo
+    - Item de inventario específico (si es serializado)
+    - Serial number (si aplica)
+    - Item de la orden (si viene de orden)
+  - Información de tracking y carrier
+  
+  ## Casos de Uso:
+  
+  ### Entrega CON Orden:
+  ```json
+  {
+    "id": 1,
+    "delivery_number": "DEL-2026-001",
+    "sales_order_id": 5,
+    "sales_order": {
+      "id": 5,
+      "order_number": "SO-2026-001",
+      "customer_name": "Juan Pérez"
+    },
+    "items": [
+      {
+        "sales_order_item_id": 1,
+        "item_id": 15,
+        "item": {
+          "serial_number": "ABC123",
+          "status": "sold"
+        }
+      }
+    ]
+  }
+  ```
+  
+  ### Entrega DIRECTA (sin orden):
+  ```json
+  {
+    "id": 2,
+    "delivery_number": "DEL-2026-002",
+    "sales_order_id": null,
+    "sales_order": null,
+    "items": [
+      {
+        "sales_order_item_id": null,
+        "item_id": 20,
+        "item": {
+          "serial_number": "XYZ789",
+          "status": "sold"
+        }
+      }
+    ]
+  }
+  ```
+  
+  ## Error 404:
+  Si la entrega no existe, retorna:
+  ```json
+  {
+    "statusCode": 404,
+    "message": "Entrega con ID X no encontrada"
+  }
+  ```
+  
+  ## Ejemplo de Uso:
+  - Ver detalles de una entrega específica
+  - Rastrear números de serie vendidos
+  - Verificar información de tracking
+  - Confirmar items entregados
+  - Auditoría de salidas de inventario
+}

@@ -64,6 +64,14 @@ export class Item {
   })
   sale_currency: string;
 
+  @Column({
+    type: 'varchar',
+    length: 50,
+    default: 'available',
+    nullable: false,
+  })
+  status: string; // available, reserved, sold
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 

@@ -1,0 +1,41 @@
+meta {
+  name: Get All Sales Orders
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{url}}/sales-orders
+  body: none
+  auth: none
+}
+
+docs {
+  # Obtener Todas las Órdenes de Venta
+  
+  ## Respuesta:
+  Retorna un array con todas las órdenes ordenadas por fecha (más recientes primero).
+  
+  Cada orden incluye:
+  - Datos principales de la orden
+  - **client**: Información del cliente (si aplica)
+  - **user**: Usuario que creó la orden
+  - **items**: Array de items con:
+    - Datos del item de la orden
+    - **product**: Información del producto
+    - **item**: Item específico de inventario (si es serializado)
+  - **deliveries**: Array de entregas relacionadas
+  
+  ## Filtros de Status:
+  Los status posibles de una orden son:
+  - `pending`: Orden creada, items reservados
+  - `confirmed`: Orden confirmada, items vendidos
+  - `in_progress`: En proceso de entrega
+  - `completed`: Completada y entregada
+  - `cancelled`: Cancelada, items liberados
+  
+  ## Ejemplo de Uso:
+  - Ver todas las órdenes pendientes
+  - Verificar órdenes confirmadas
+  - Revisar historial completo de ventas
+}
